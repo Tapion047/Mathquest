@@ -1,0 +1,2553 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathquest</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                        },
+                        accent: {
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                        },
+                        confidence: {
+                            low: '#ef4444',
+                            mid: '#f59e0b',
+                            high: '#10b981'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .transition-all-custom { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        /* Breathing animation for anxiety reduction section */
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.4); opacity: 1; }
+        }
+        .animate-breathe {
+            animation: breathe 8s infinite ease-in-out;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.2);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-full flex flex-col transition-colors duration-300">
+
+    <!-- NAVIGATION HEADER -->
+    <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-800/90 backdrop-blur border-b border-slate-200 dark:border-slate-700 px-4 lg:px-8 py-3 transition-colors">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <!-- Brand Logo -->
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="showSection('dashboard')">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-accent-500 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
+                    <i class="fa-solid fa-brain text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight text-slate-900 dark:text-white flex items-center gap-2">
+                        Mathquest <span class="text-xs bg-brand-100 dark:bg-brand-900/60 text-brand-600 dark:text-brand-300 font-semibold px-2 py-0.5 rounded-full">II Medio</span>
+                    </h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Entrenamiento con Confianza & Metacognición</p>
+                </div>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="hidden md:flex items-center space-x-6">
+                <!-- Confidence Score -->
+                <div class="flex items-center space-x-2 bg-slate-100 dark:bg-slate-700/60 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-600">
+                    <i class="fa-solid fa-heart-pulse text-rose-500 text-sm"></i>
+                    <div>
+                        <div class="text-[10px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400">Confianza</div>
+                        <div class="text-xs font-bold flex items-center gap-1 text-slate-800 dark:text-slate-100">
+                            <span id="user-confidence">75</span>%
+                        </div>
+                    </div>
+                </div>
+
+                <!-- XP / Energy -->
+                <div class="flex items-center space-x-2 bg-slate-100 dark:bg-slate-700/60 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-600">
+                    <i class="fa-solid fa-bolt text-amber-500 text-sm"></i>
+                    <div>
+                        <div class="text-[10px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400">Puntos XP</div>
+                        <div class="text-xs font-bold text-slate-800 dark:text-slate-100"><span id="user-xp">320</span> XP</div>
+                    </div>
+                </div>
+
+                <!-- Streak -->
+                <div class="flex items-center space-x-2 bg-slate-100 dark:bg-slate-700/60 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-600">
+                    <i class="fa-solid fa-fire text-orange-500 text-sm"></i>
+                    <div>
+                        <div class="text-[10px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400">Racha</div>
+                        <div class="text-xs font-bold text-slate-800 dark:text-slate-100"><span id="user-streak">4</span> días</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Header Controls -->
+            <div class="flex items-center space-x-3">
+                <!-- Dark Mode Toggle -->
+                <button id="theme-toggle" onclick="toggleTheme()" aria-label="Cambiar tema" class="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+                    <i id="theme-icon" class="fa-solid fa-moon text-lg"></i>
+                </button>
+
+                <!-- Avatar -->
+                <div class="flex items-center space-x-2 pl-2 border-l border-slate-200 dark:border-slate-700">
+                    <div class="w-9 h-9 rounded-xl bg-slate-200 dark:bg-slate-700 overflow-hidden border-2 border-brand-500 flex items-center justify-center text-lg font-bold text-brand-600 dark:text-brand-300">
+                        🎓
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MOBILE STATS STRIP -->
+    <div class="md:hidden bg-slate-100 dark:bg-slate-800 px-4 py-2 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center text-xs">
+        <div class="flex items-center gap-1"><i class="fa-solid fa-heart-pulse text-rose-500"></i> Confianza: <span id="user-confidence-mobile" class="font-bold">75%</span></div>
+        <div class="flex items-center gap-1"><i class="fa-solid fa-bolt text-amber-500"></i> <span id="user-xp-mobile" class="font-bold">320 XP</span></div>
+        <div class="flex items-center gap-1"><i class="fa-solid fa-fire text-orange-500"></i> Racha: <span id="user-streak-mobile" class="font-bold">4 d</span></div>
+    </div>
+
+    <!-- MAIN WRAPPER WITH NAVIGATION -->
+    <div class="flex-1 max-w-7xl w-full mx-auto flex flex-col md:flex-row p-4 lg:p-6 gap-6">
+
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="w-full md:w-64 flex-shrink-0">
+            <nav class="bg-white dark:bg-slate-800 rounded-2xl p-3 border border-slate-200 dark:border-slate-700 shadow-sm space-y-1 sticky top-20">
+                <button onclick="showSection('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/30">
+                    <i class="fa-solid fa-compass text-lg w-5"></i>
+                    <span>Panel Principal</span>
+                </button>
+                <button onclick="showSection('seleccionar_mision')" id="nav-seleccionar_mision" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                    <i class="fa-solid fa-list-check text-lg w-5"></i>
+                    <span>Elegir Misión</span>
+                </button>
+                <button onclick="showSection('kahooma'); initKahooma();" id="nav-kahooma" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                    <i class="fa-solid fa-shapes text-lg text-fuchsia-500 w-5"></i>
+                    <span>Kahooma</span>
+                </button>
+                <button onclick="showSection('matriz'); initMatriz();" id="nav-matriz" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                    <i class="fa-solid fa-border-all text-lg text-blue-500 w-5"></i>
+                    <span>Bingo matemático</span>
+                </button>
+                <button onclick="showSection('semejanza'); initSemejanza();" id="nav-semejanza" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                    <i class="fa-solid fa-clone text-lg text-emerald-500 w-5"></i>
+                    <span>Figuras Semejantes</span>
+                </button>
+                <!-- Nuevo botón: Gráfico a Expresión -->
+<button onclick="showSection('grafico-expresion'); initGraficoExpresion();" id="nav-grafico-expresion" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+    <i class="fa-solid fa-chart-line text-lg text-rose-500 w-5"></i>
+    <span>Del gráfico a la expresión</span>
+</button>
+                <button onclick="showSection('calm')" id="nav-calm" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                    <i class="fa-solid fa-spa text-lg text-emerald-500 w-5"></i>
+                    <span>Pausa & Calma</span>
+                </button>
+
+                <!-- Motivational Banner Sidebar -->
+                <div class="pt-4 border-t border-slate-100 dark:border-slate-700/60 mt-3 px-3">
+                    <div class="bg-gradient-to-br from-indigo-500/10 to-accent-500/10 dark:from-indigo-500/20 dark:to-accent-500/20 p-3.5 rounded-xl border border-indigo-200/50 dark:border-indigo-500/30">
+                        <div class="flex items-center gap-2 text-indigo-700 dark:text-indigo-300 text-xs font-bold mb-1">
+                            <i class="fa-solid fa-lightbulb"></i> Recordatorio Clave
+                        </div>
+                        <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">
+                            "El error en matemática no es un fallo; es la pista exacta que te muestra qué estrategia ajustar."
+                        </p>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-1 min-w-0">
+
+            <!-- SECTION 1: DASHBOARD -->
+            <section id="section-dashboard" class="space-y-6 block">
+                <!-- Welcome Banner -->
+                <div class="bg-gradient-to-r from-brand-600 via-brand-500 to-accent-600 text-white rounded-3xl p-6 lg:p-8 shadow-xl shadow-brand-500/10 relative overflow-hidden">
+                    <div class="relative z-10 max-w-2xl">
+                        <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur px-3 py-1 rounded-full text-xs font-medium mb-3">
+                            <i class="fa-solid fa-star text-amber-300"></i>
+                            <span>Espacio de Aprendizaje Seguro - Sin Tiempo Limite</span>
+                        </div>
+                        <h2 class="text-2xl lg:text-3xl font-extrabold tracking-tight mb-2">
+                            ¡Hola, Estudiante! 👋
+                        </h2>
+                        <p class="text-brand-100 text-sm lg:text-base mb-6 leading-relaxed">
+                            Aquí el SIMCE no se mide en velocidad, sino en el **valor de tus estrategias**. Entrena paso a paso, reflexiona sobre tus avances y fortalece tu autoconfianza.
+                        </p>
+                        <div class="flex flex-wrap gap-3">
+                            <button onclick="showSection('seleccionar_mision')" class="bg-white text-brand-700 hover:bg-slate-100 px-5 py-2.5 rounded-xl font-bold text-sm shadow-md transition-all transform active:scale-95 flex items-center gap-2">
+                                <i class="fa-solid fa-play"></i> Iniciar Misión
+                            </button>
+                            <button onclick="showSection('calm')" class="bg-white/15 hover:bg-white/25 text-white backdrop-blur px-4 py-2.5 rounded-xl font-semibold text-sm transition flex items-center gap-2 border border-white/20">
+                                <i class="fa-solid fa-wind"></i> Ejercicio de Respiración
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Decorative Shapes -->
+                    <div class="absolute -right-8 -bottom-8 w-60 h-60 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+                </div>
+
+                <!-- Confidence & Self-Efficacy Diagnostic Card -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                        <div>
+                            <h3 class="font-bold text-slate-900 dark:text-white flex items-center gap-2 text-base">
+                                <i class="fa-solid fa-shield-heart text-brand-500"></i> Estado de Confianza Matemática
+                            </h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Basado en tu persistencia, análisis de errores y uso de andamiaje.</p>
+                        </div>
+                        <span class="inline-flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-xs font-semibold px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800">
+                            <i class="fa-solid fa-arrow-up"></i> +12% esta semana
+                        </span>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs font-semibold">
+                            <span class="text-slate-600 dark:text-slate-400">Nivel Actual: <strong class="text-brand-600 dark:text-brand-400">Mente Estratégica</strong></span>
+                            <span class="text-slate-800 dark:text-slate-200" id="dash-confidence-text">75 / 100 PTS</span>
+                        </div>
+                        <div class="w-full bg-slate-100 dark:bg-slate-700 h-3.5 rounded-full overflow-hidden p-0.5">
+                            <div id="dash-confidence-bar" class="bg-gradient-to-r from-brand-500 to-accent-500 h-full rounded-full transition-all duration-700" style="width: 75%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Growth Mindset Micro-quotes -->
+                    <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-slate-100 dark:border-slate-700/60">
+                        <div class="p-3 bg-slate-50 dark:bg-slate-700/40 rounded-xl">
+                            <div class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                                <i class="fa-solid fa-check text-emerald-500"></i> Planificación
+                            </div>
+                            <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Lees activamente los problemas antes de calcular.</div>
+                        </div>
+                        <div class="p-3 bg-slate-50 dark:bg-slate-700/40 rounded-xl">
+                            <div class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                                <i class="fa-solid fa-rotate-left text-brand-500"></i> Ruta de Rescate
+                            </div>
+                            <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Revisas tus errores sin frustrarte. ¡Sigue así!</div>
+                        </div>
+                        <div class="p-3 bg-slate-50 dark:bg-slate-700/40 rounded-xl">
+                            <div class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                                <i class="fa-solid fa-hourglass-half text-amber-500"></i> Ritmo Libre
+                            </div>
+                            <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Aprender toma tiempo. Cada intento suma.</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: SELECCIONAR MISION (Selectores en cascada) -->
+            <section id="section-seleccionar_mision" class="hidden space-y-6">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
+                    <h3 class="font-bold text-slate-900 dark:text-white text-lg mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-brand-500"></i> Configurar Misión
+                    </h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Selecciona el eje y sub-eje que deseas practicar. Te presentaremos preguntas de dificultad ascendente para asegurar tu aprendizaje.</p>
+
+                    <div class="space-y-4">
+                        <!-- Selector Eje -->
+                        <div>
+                            <label for="selector-eje" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Eje Temático</label>
+                            <select id="selector-eje" onchange="actualizarSubEjes()" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white text-sm rounded-xl focus:ring-brand-500 focus:border-brand-500 block p-3 outline-none">
+                                <option value="" disabled selected>Elige un eje...</option>
+                                <option value="numeros">1. Números</option>
+                                <option value="algebra">2. Álgebra y Funciones</option>
+                                <option value="geometria">3. Geometría</option>
+                                <option value="datos_azar">4. Datos y Azar</option>
+                            </select>
+                        </div>
+
+                        <!-- Selector Sub-eje -->
+                        <div>
+                            <label for="selector-subeje" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Sub-eje Específico</label>
+                            <select id="selector-subeje" disabled class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white text-sm rounded-xl focus:ring-brand-500 focus:border-brand-500 block p-3 outline-none disabled:opacity-50">
+                                <option value="" disabled selected>Primero elige un eje...</option>
+                            </select>
+                        </div>
+                        
+                        <button id="btn-comenzar-mision" disabled onclick="iniciarMisionPersonalizada()" class="w-full mt-4 py-3 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-sm rounded-xl transition shadow-md flex items-center justify-center gap-2">
+                            <span>Comenzar Misión</span>
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: METACOGNITIVE SIMCE MISSIONS -->
+            <section id="section-missions" class="hidden space-y-6">
+                <!-- Mission Top Bar -->
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <button onclick="showSection('seleccionar_mision')" class="p-2 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+                        <div>
+                            <span id="mission-eje-tag" class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-brand-100 dark:bg-brand-900/50 text-brand-600 dark:text-brand-300">EJE</span>
+                            <h3 id="mission-title" class="font-bold text-slate-900 dark:text-white text-base">Título Sub-eje</h3>
+                        </div>
+                    </div>
+                    <div class="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                        <span id="mission-progress-text">1/3</span>
+                        <i class="fa-solid fa-layer-group text-brand-500"></i>
+                    </div>
+                </div>
+
+                <!-- Step Indicator / Progress Metacognitive Steps -->
+                <div class="grid grid-cols-3 gap-2">
+                    <div id="step-tab-1" class="p-3 rounded-xl border-2 border-brand-500 bg-brand-50/50 dark:bg-brand-900/20 text-center transition">
+                        <div class="text-[10px] font-bold text-brand-600 dark:text-brand-300 uppercase">Paso 1</div>
+                        <div class="text-xs font-bold text-slate-800 dark:text-slate-100">Planificación</div>
+                    </div>
+                    <div id="step-tab-2" class="p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-center transition opacity-60">
+                        <div class="text-[10px] font-bold text-slate-400 uppercase">Paso 2</div>
+                        <div class="text-xs font-bold text-slate-800 dark:text-slate-100">Ejecución</div>
+                    </div>
+                    <div id="step-tab-3" class="p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-center transition opacity-60">
+                        <div class="text-[10px] font-bold text-slate-400 uppercase">Paso 3</div>
+                        <div class="text-xs font-bold text-slate-800 dark:text-slate-100">Reflexión</div>
+                    </div>
+                </div>
+
+                <!-- Problem Card Box -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-6">
+                    <!-- Problem Statement -->
+                    <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200/80 dark:border-slate-600/50">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Enunciado Tipo SIMCE</span>
+                            <span id="dificultad-badge" class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full"></span>
+                        </div>
+                        <p id="problem-text" class="text-slate-800 dark:text-slate-100 font-medium leading-relaxed text-sm lg:text-base">
+                            Cargando pregunta...
+                        </p>
+                    </div>
+
+                    <!-- METACOGNITIVE STEP 1: PLANIFICACIÓN -->
+                    <div id="metacognitive-step-1" class="space-y-4 block">
+                        <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-200/60 dark:border-amber-700/40">
+                            <h4 class="font-bold text-amber-800 dark:text-amber-300 text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-compass"></i> Antes de resolver: Estrategia Inicial
+                            </h4>
+                            <p class="text-xs text-amber-700 dark:text-amber-400 mt-1">
+                                Identificar qué te están pidiendo o cuáles son los datos clave disminuye la ansiedad y guía tu resolución.
+                            </p>
+                        </div>
+
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                            ¿Cuál de las siguientes es la mejor estrategia para comenzar este problema?
+                        </label>
+
+                        <div id="plan-options" class="space-y-2">
+                            <!-- Populated dynamically -->
+                        </div>
+
+                        <button id="btn-submit-step1" disabled onclick="validateStep1()" class="w-full py-3 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-sm rounded-xl transition shadow-md flex items-center justify-center gap-2">
+                            <span>Confirmar Planificación e Ir a Ejecución</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+
+                    <!-- METACOGNITIVE STEP 2: EJECUCIÓN CON ANDAMIAJE -->
+                    <div id="metacognitive-step-2" class="hidden space-y-4">
+                        <div class="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-xl border border-indigo-200/60 dark:border-indigo-700/40 flex justify-between items-start">
+                            <div>
+                                <h4 class="font-bold text-indigo-800 dark:text-indigo-300 text-sm flex items-center gap-2">
+                                    <i class="fa-solid fa-calculator"></i> Ejecución Estratégica
+                                </h4>
+                                <p class="text-xs text-indigo-700 dark:text-indigo-400 mt-1">
+                                    Aplica tu plan. Si te sientes inseguro/a, puedes solicitar una pista.
+                                </p>
+                            </div>
+                            <button onclick="toggleHint()" class="text-xs bg-indigo-100 dark:bg-indigo-800 text-indigo-700 dark:text-indigo-200 font-bold px-3 py-1.5 rounded-lg hover:bg-indigo-200 transition flex items-center gap-1">
+                                <i class="fa-solid fa-lightbulb"></i> <span id="hint-btn-text">Ver Pista</span>
+                            </button>
+                        </div>
+
+                        <!-- Hint Content -->
+                        <div id="hint-box" class="hidden p-4 rounded-xl bg-amber-50 dark:bg-amber-900/30 border border-amber-300 text-xs text-amber-900 dark:text-amber-200">
+                            <strong>💡 Pista de Apoyo:</strong> <span id="hint-text">Cargando pista...</span>
+                        </div>
+
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                            Selecciona la alternativa correcta:
+                        </label>
+
+                        <!-- Answer Options -->
+                        <div id="execution-options" class="space-y-2">
+                            <!-- Populated dynamically -->
+                        </div>
+
+                        <button id="btn-submit-step2" disabled onclick="validateStep2()" class="w-full py-3 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-sm rounded-xl transition shadow-md flex items-center justify-center gap-2">
+                            <span>Verificar Respuesta</span>
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                    </div>
+
+                    <!-- METACOGNITIVE STEP 3: REFLEXIÓN & RUTA DE RESCATE -->
+                    <div id="metacognitive-step-3" class="hidden space-y-4">
+                        <!-- Success / Rescue Feed -->
+                        <div id="feedback-box" class="p-5 rounded-xl border">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div id="feedback-icon" class="w-10 h-10 rounded-full flex items-center justify-center text-xl text-white"></div>
+                                <h4 id="feedback-title" class="font-bold text-base"></h4>
+                            </div>
+                            <p id="feedback-message" class="text-sm mt-2 font-medium"></p>
+                        </div>
+                        <button id="btn-next-question" onclick="nextQuestion()" class="w-full py-3 bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 text-white font-bold text-sm rounded-xl transition shadow-md flex items-center justify-center gap-2">
+                            <span id="btn-next-text">Siguiente Pregunta</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+            <!-- SECTION 4: JUEGO KAHOOMA -->
+            <section id="section-kahooma" class="hidden space-y-6">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-slate-900 dark:text-white text-lg flex items-center gap-2">
+                            <i class="fa-solid fa-shapes text-fuchsia-500"></i> Desafío Kahooma
+                        </h3>
+                        <span class="bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/40 dark:text-fuchsia-300 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                            Nivel 1: Suma Enteros
+                        </span>
+                    </div>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mb-8">
+                        Activa tu cálculo mental. En cada tablero, selecciona <strong>exactamente 2 números</strong> de los extremos que al sumarlos den como resultado el número del centro.
+                    </p>
+                    
+                    <!-- Contenedor de los 3 tableros -->
+                    <div id="kahooma-container" class="grid grid-cols-1 md:grid-cols-3 gap-12 place-items-center">
+                        <!-- Los tableros se generan dinámicamente con JS -->
+                    </div>
+
+                    <div class="mt-12 flex justify-center border-t border-slate-100 dark:border-slate-700/60 pt-6">
+                        <button onclick="initKahooma()" class="bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-bold py-3 px-6 rounded-xl transition shadow-md shadow-fuchsia-500/20 flex items-center gap-2">
+                            <i class="fa-solid fa-rotate"></i> Generar Nuevos Tableros
+                        </button>
+                    </div>
+                </div>
+            </section>
+<!-- SECTION 5: BINGO MATEMÁTICO (CON VIDAS) -->
+            <section id="section-matriz" class="hidden space-y-6">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-slate-900 dark:text-white text-lg flex items-center gap-2">
+                            <i class="fa-solid fa-border-all text-blue-500"></i> Bingo Matemático
+                        </h3>
+                        <span class="bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                            Desafío 3 Vidas
+                        </span>
+                    </div>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">
+                        Resuelve la expresión y selecciona el resultado en la cuadrícula. Tienes 3 intentos por cartón. ¡Piensa bien antes de hacer clic!
+                    </p>
+
+                    <!-- Expression Box con Botón Pasapalabra y Vidas -->
+                    <div class="flex flex-col md:flex-row gap-6 items-center justify-between bg-blue-50 dark:bg-blue-900/20 p-6 rounded-xl border border-blue-200 dark:border-blue-800 mb-8">
+                        
+                        <!-- Contenedor de Vidas -->
+                        <div class="flex flex-col items-center gap-2 w-full md:w-auto">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Vidas Restantes</span>
+                            <div id="bingo-vidas" class="flex gap-2 text-2xl">
+                                <!-- Generado por JS -->
+                            </div>
+                        </div>
+
+                        <!-- Expresión -->
+                        <div class="text-center flex-1">
+                            <span class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest block mb-2">Expresión a Resolver</span>
+                            <!-- En SECTION 5, busca este div y agrega break-all -->
+<div id="matriz-expression" class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white tracking-wide transition-all break-all">
+                                Cargando...
+                            </div>
+                        </div>
+
+                        <!-- Pasapalabra -->
+                        <button onclick="saltarExpresion()" class="bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-900/50 dark:hover:bg-indigo-800 text-indigo-700 dark:text-indigo-300 px-4 py-3 rounded-lg text-sm font-bold transition flex items-center gap-2 shadow-sm whitespace-nowrap w-full md:w-auto justify-center">
+                            <i class="fa-solid fa-forward-step"></i> Pasapalabra
+                        </button>
+                    </div>
+
+                    <!-- Grid 4x3 -->
+                    <div id="matriz-grid" class="grid grid-cols-2 md:grid-cols-4 grid-rows-3 gap-3 md:gap-4 place-items-center max-w-3xl mx-auto">
+                        <!-- Las casillas se generan dinámicamente con JS -->
+                    </div>
+
+                    <div class="mt-10 flex justify-center border-t border-slate-100 dark:border-slate-700/60 pt-6">
+                        <button onclick="initMatriz()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition shadow-md shadow-blue-500/20 flex items-center gap-2">
+                            <i class="fa-solid fa-rotate"></i> Generar Nuevo Cartón
+                        </button>
+                    </div>
+                </div>
+            </section>
+<!-- SECTION 6: PROPORCIONALIDAD Y SEMEJANZA -->
+            <section id="section-semejanza" class="hidden space-y-6">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-slate-900 dark:text-white text-lg flex items-center gap-2">
+                            <i class="fa-solid fa-clone text-emerald-500"></i> Proporcionalidad de Figuras
+                        </h3>
+                        <span class="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                            Razón Geométrica
+                        </span>
+                    </div>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">
+                        Encuentra las parejas de figuras semejantes basándote en sus lados y ángulos. Tienes <strong class="text-rose-500">3 vidas</strong>. Recuerda: la razón de semejanza depende de tu orden de elección (Segunda Figura ÷ Primera Figura).
+                    </p>
+
+                    <!-- Contador de Vidas -->
+                    <div class="flex justify-center mb-6">
+                        <div id="semejanza-vidas-container" class="flex gap-2 text-2xl">
+                            <!-- Corazones generados por JS -->
+                        </div>
+                    </div>
+
+                    <!-- Cuadrícula -->
+                    <div id="semejanza-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 place-items-center max-w-4xl mx-auto">
+                        <!-- Láminas generadas por JS -->
+                    </div>
+
+<!-- Modal para ingresar Razón (TAMAÑOS AMPLIADOS AQUÍ) -->
+                    <div id="modal-razon" class="hidden absolute inset-0 bg-slate-900/90 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all-custom overflow-y-auto">
+                        <div class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-2xl max-w-2xl w-full text-center border border-slate-200 dark:border-slate-700 shadow-2xl my-auto">
+                            <h4 class="text-xl md:text-2xl font-bold text-emerald-600 dark:text-emerald-400 mb-2">¡Pareja Encontrada!</h4>
+                            <p class="text-sm text-slate-600 dark:text-slate-300 mb-6">Escribe la razón de semejanza de la Segunda figura respecto a la Primera. (Ej: 2, 0.5, 1/2, 1)</p>
+                            
+                            <div class="flex flex-col sm:flex-row justify-center items-center gap-6 mb-8">
+                                <!-- Figuras ampliadas para ver detalles y medidas -->
+                                <div id="figura-preview-1" class="w-48 h-48 md:w-56 md:h-56 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-700 rounded-xl text-slate-800 dark:text-slate-200 p-4 shadow-inner border border-slate-200 dark:border-slate-600 overflow-visible text-lg md:text-xl"></div>
+                                
+                                <i class="fa-solid fa-arrow-right text-emerald-500 text-3xl rotate-90 sm:rotate-0"></i>
+                                
+                                <div id="figura-preview-2" class="w-48 h-48 md:w-56 md:h-56 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-700 rounded-xl text-slate-800 dark:text-slate-200 p-4 shadow-inner border border-slate-200 dark:border-slate-600 overflow-visible text-lg md:text-xl"></div>
+                            </div>
+                            <input type="text" id="input-razon" placeholder="Ingresa la razón..." class="w-full max-w-md mx-auto block text-center p-4 rounded-xl border-2 border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:border-emerald-500 mb-4 font-bold text-2xl">
+                            <p id="error-razon" class="text-rose-500 text-sm font-bold mb-4 hidden">Razón incorrecta. ¡Pierdes 1 vida!</p>
+                            
+                            <button onclick="verificarRazon()" class="w-full max-w-md mx-auto block bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 md:py-4 rounded-xl transition shadow-md text-lg md:text-xl">
+                                Confirmar Razón
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mt-10 flex justify-center border-t border-slate-100 dark:border-slate-700/60 pt-6">
+                        <button onclick="initSemejanza()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-bold py-2 px-6 rounded-xl transition flex items-center gap-2 text-sm">
+                            <i class="fa-solid fa-rotate"></i> Reiniciar Tablero
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 7: DEL GRÁFICO A LA EXPRESIÓN -->
+<section id="section-grafico-expresion" class="hidden space-y-6">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
+        <div class="flex justify-between items-start mb-2">
+            <h3 class="font-bold text-slate-900 dark:text-white text-lg flex items-center gap-2">
+                <i class="fa-solid fa-chart-line text-rose-500"></i> Del Gráfico a la Expresión
+            </h3>
+            <span class="bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                Función Cuadrática
+            </span>
+        </div>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">
+            Observa la parábola azul punteada en el plano cartesiano. Sabiendo que es una traslación de la parábola original <strong>y = x²</strong>, escribe su expresión algebraica para superponer tu gráfica. No hay límite de intentos.
+        </p>
+
+        <div class="flex flex-col lg:flex-row gap-8 items-start justify-center">
+            <!-- Contenedor del Plano Cartesiano -->
+            <div class="bg-white dark:bg-slate-900 p-2 rounded-xl border-2 border-slate-200 dark:border-slate-700 shadow-inner w-full max-w-[420px] mx-auto flex justify-center">
+                <canvas id="canvas-grafico" width="400" height="400" class="max-w-full h-auto bg-slate-50 dark:bg-slate-800 rounded-lg"></canvas>
+            </div>
+
+            <!-- Controles e Inputs -->
+            <div class="w-full lg:w-1/2 space-y-6">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">
+                        Ingresa tu expresión
+                    </label>
+                    <div class="flex gap-3">
+                        <span class="text-2xl font-bold text-slate-600 dark:text-slate-400 flex items-center">f(x) = </span>
+                        <input type="text" id="input-expresion" placeholder="Ej: (x-2)^2 + 3" class="w-full p-4 rounded-xl border-2 border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:border-rose-500 font-mono text-lg transition">
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-2"><i class="fa-solid fa-circle-info"></i> Usa el símbolo <strong>^2</strong> para elevar al cuadrado.</p>
+                </div>
+
+                <div id="mensaje-grafico" class="hidden p-4 rounded-xl font-medium text-sm flex items-center gap-2"></div>
+
+                <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-100 dark:border-slate-700/60">
+                    <button onclick="graficarUsuario()" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl transition shadow-md flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-pen-ruler"></i> Graficar y Comprobar
+                    </button>
+                    <button onclick="initGraficoExpresion()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-bold py-3 px-6 rounded-xl transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-rotate"></i> Nueva Parábola
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+            
+            <!-- SECTION 3: PAUSA Y CALMA -->
+            <section id="section-calm" class="hidden h-full flex flex-col justify-center items-center py-12">
+                <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">Momento de Calma</h2>
+                <p class="text-slate-500 dark:text-slate-400 mb-12 text-center max-w-md">Respira al ritmo del círculo para reducir la ansiedad matemática antes de continuar.</p>
+                
+                <div class="relative w-48 h-48 flex items-center justify-center">
+                    <div class="absolute inset-0 bg-emerald-400 rounded-full animate-breathe opacity-20"></div>
+                    <div class="absolute inset-4 bg-emerald-500 rounded-full animate-breathe opacity-40 delay-75"></div>
+                    <div class="absolute inset-8 bg-emerald-600 rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/50 z-10">
+                        <i class="fa-solid fa-spa text-4xl text-white"></i>
+                    </div>
+                </div>
+
+                <button onclick="showSection('dashboard')" class="mt-16 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-6 py-3 rounded-xl font-medium shadow-sm hover:bg-slate-50 transition">
+                    Volver al Panel
+                </button>
+            </section>
+        </main>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC & JSON DATA -->
+    <script>
+        // 1. ESTRUCTURA DE CONTENIDOS Y SUB-EJES
+        const estructuraSimce = {
+            numeros: {
+                nombre: "Números",
+                subEjes: [
+                    { id: "1.1", nombre: "Conjuntos numéricos y operatoria" },
+                    { id: "1.2", nombre: "Potencias y raíces" },
+                    { id: "1.3", nombre: "Razones, proporciones y porcentajes" }
+                ]
+            },
+            algebra: {
+                nombre: "Álgebra",
+                subEjes: [
+                    { id: "2.1", nombre: "Lenguaje algebraico y operatoria básica" },
+                    { id: "2.2", nombre: "Productos notables y Factorización" },
+                    { id: "2.3", nombre: "Ecuaciones y Sistemas de ecuaciones" },
+                    { id: "2.4", nombre: "Funciones" }
+                ]
+            },
+            geometria: {
+                nombre: "Geometría",
+                subEjes: [
+                    { id: "3.1", nombre: "Proporcionalidad geométrica" },
+                    { id: "3.2", nombre: "Geometría Analítica" },
+                    { id: "3.3", nombre: "Perímetro, Área y Volumen" },
+                    { id: "3.4", nombre: "Ángulos y Teorema de Pitágoras" }
+                ]
+            },
+            datos_azar: {
+                nombre: "Datos y Azar",
+                subEjes: [
+                    { id: "4.1", nombre: "Representación de datos" },
+                    { id: "4.2", nombre: "Estadística descriptiva" },
+                    { id: "4.3", nombre: "Probabilidades" }
+                ]
+            }
+        };
+
+        const nivelesDificultad = {
+            "Insuficiente": 1,
+            "Elemental": 2,
+            "Adecuado": 3
+        };
+
+        // 2. BANCO DE PREGUNTAS MOCKUP & GENERADORES DINÁMICOS
+
+        // Función para generar pregunta parametrizada de Álgebra
+        function generarPreguntaSueldos() {
+            const elegirAlAzar = (arr) => arr[Math.floor(Math.random() * arr.length)];
+            const comision_a = elegirAlAzar([2500, 3000, 3500, 4000]);
+            const comision_b = comision_a - elegirAlAzar([500, 1000]);
+            const telefonos_meta = elegirAlAzar([20, 30, 40, 50, 60]);
+            const sueldo_base_a = elegirAlAzar([200000, 220000, 250000]);
+            const sueldo_base_b = sueldo_base_a + (comision_a - comision_b) * telefonos_meta;
+
+            const texto = `Un vendedor tiene dos ofertas. La compañía A ofrece un sueldo de $${sueldo_base_a} más $${comision_a} por cada teléfono vendido. La compañía B ofrece $${sueldo_base_b} más $${comision_b} por teléfono vendido. ¿Cuántos teléfonos debe vender para ganar lo mismo en ambas?`;
+
+            const correcta = telefonos_meta;
+            let alternativasRaw = [
+                { valor: correcta, correcta: true },
+                { valor: correcta + 10, correcta: false },
+                { valor: correcta - 5, correcta: false },
+                { valor: correcta + 5, correcta: false }
+            ];
+
+            // Desordenar las alternativas
+            alternativasRaw = alternativasRaw.sort(() => Math.random() - 0.5);
+
+            // Formatear a letras A, B, C, D
+            const letras = ["A", "B", "C", "D"];
+            const opciones = alternativasRaw.map((alt, index) => ({
+                letra: letras[index],
+                texto: alt.valor.toString(),
+                correcta: alt.correcta
+            }));
+
+            return {
+                id: Date.now(), 
+                subEjeId: "2.3", // Asignado a: Ecuaciones y Sistemas de ecuaciones
+                dificultad: "Adecuado",
+                texto: texto,
+                plan_opciones: [
+                    { texto: "Plantear una ecuación igualando el sueldo total de la compañía A con el de la B.", correcta: true },
+                    { texto: "Sumar los sueldos base y dividir por las comisiones.", correcta: false }
+                ],
+                pista: "Escribe el sueldo de A como: Base A + (Comisión A * x). Haz lo mismo para B e iguala ambas expresiones.",
+                opciones: opciones
+            };
+        }
+
+        const bancoPreguntas = [
+            // --- EJE 1: NÚMEROS ---
+            // 1.1 Conjuntos numéricos y operatoria
+            {
+                id: 1010, subEjeId: "1.1", dificultad: "Insuficiente", 
+                texto: "Al resolver la operación 2 + (-5) + 8, ¿cuál es el resultado?",
+                plan_opciones: [
+                    { texto: "Sumar los números positivos por un lado y luego restar el número negativo.", correcta: true },
+                    { texto: "Sumar todo sin importar los signos.", correcta: false }
+                ],
+                pista: "Junta los positivos: 2 + 8 = 10. Luego resta 5.",
+                opciones: [
+                    {letra: "A", texto: "5", correcta: true},
+                    {letra: "B", texto: "15", correcta: false},
+                    {letra: "C", texto: "-5", correcta: false},
+                    {letra: "D", texto: "-11", correcta: false}
+                ]
+            },
+            {
+                id: 1011, subEjeId: "1.1", dificultad: "Elemental", 
+                texto: "¿Cuál es el valor de 3/5 + 1/5?",
+                plan_opciones: [
+                    { texto: "Conservar el denominador porque son iguales y sumar los numeradores.", correcta: true },
+                    { texto: "Sumar numeradores y denominadores entre sí.", correcta: false }
+                ],
+                pista: "Tienen igual denominador, solo debes sumar los números de arriba.",
+                opciones: [
+                    {letra: "A", texto: "4/5", correcta: true},
+                    {letra: "B", texto: "4/10", correcta: false},
+                    {letra: "C", texto: "2/5", correcta: false},
+                    {letra: "D", texto: "3/25", correcta: false}
+                ]
+            },
+            {
+                id: 101, subEjeId: "1.1", dificultad: "Adecuado", 
+                texto: "Al resolver la operación 3/4 - (1/2 * 1/3), el resultado final es:",
+                plan_opciones: [
+                    { texto: "Resolver primero la multiplicación por jerarquía de operaciones, y luego buscar el mínimo común múltiplo para restar.", correcta: true },
+                    { texto: "Restar primero las fracciones iniciales de izquierda a derecha y luego multiplicar el resultado.", correcta: false }
+                ],
+                pista: "Recuerda la jerarquía de las operaciones (PAPOMUDAS): las multiplicaciones se resuelven estrictamente antes que las sumas o restas.",
+                opciones: [
+                    {letra: "A", texto: "7/12", correcta: true},
+                    {letra: "B", texto: "1/12", correcta: false},
+                    {letra: "C", texto: "1/4", correcta: false},
+                    {letra: "D", texto: "1/8", correcta: false}
+                ]
+            },
+            
+            // 1.2 Potencias y raíces
+            {
+                id: 1020, subEjeId: "1.2", dificultad: "Insuficiente", 
+                texto: "¿Cuál es el resultado de 3²?",
+                plan_opciones: [
+                    { texto: "Multiplicar la base por sí misma la cantidad de veces que indica el exponente.", correcta: true },
+                    { texto: "Multiplicar la base por el exponente (3 por 2).", correcta: false }
+                ],
+                pista: "3 elevado a 2 significa 3 x 3.",
+                opciones: [
+                    {letra: "A", texto: "9", correcta: true},
+                    {letra: "B", texto: "6", correcta: false},
+                    {letra: "C", texto: "5", correcta: false},
+                    {letra: "D", texto: "27", correcta: false}
+                ]
+            },
+            {
+                id: 102, subEjeId: "1.2", dificultad: "Elemental", 
+                texto: "¿Cuál es el valor de √50 + √18 simplificado al máximo?",
+                plan_opciones: [
+                    { texto: "Descomponer las cantidades subradicales en factores que tengan raíz cuadrada exacta para luego sumar raíces semejantes.", correcta: true },
+                    { texto: "Sumar directamente los números dentro de una sola raíz, calculando la raíz de 68.", correcta: false }
+                ],
+                pista: "Busca escribir 50 y 18 como el producto de un número cuadrado perfecto (como 25 y 9) por otro número para poder extraerlos de la raíz.",
+                opciones: [
+                    {letra: "A", texto: "8√2", correcta: true},
+                    {letra: "B", texto: "√68", correcta: false},
+                    {letra: "C", texto: "5√2", correcta: false},
+                    {letra: "D", texto: "15√2", correcta: false}
+                ]
+            },
+            {
+                id: 1021, subEjeId: "1.2", dificultad: "Adecuado", 
+                texto: "Al resolver (2³) * (2⁻¹), ¿cuál es el resultado?",
+                plan_opciones: [
+                    { texto: "Conservar la base y sumar los exponentes por ser multiplicación de potencias de igual base.", correcta: true },
+                    { texto: "Multiplicar las bases y restar los exponentes.", correcta: false }
+                ],
+                pista: "La base es 2. Suma los exponentes: 3 + (-1).",
+                opciones: [
+                    {letra: "A", texto: "4", correcta: true},
+                    {letra: "B", texto: "2", correcta: false},
+                    {letra: "C", texto: "8", correcta: false},
+                    {letra: "D", texto: "-4", correcta: false}
+                ]
+            },
+
+            // 1.3 Razones, proporciones y porcentajes
+            {
+                id: 103, subEjeId: "1.3", dificultad: "Insuficiente", 
+                texto: "Un producto cuesta $10.000. Si tiene un 10% de descuento, ¿cuál es el monto del descuento en pesos?",
+                plan_opciones: [
+                    { texto: "Multiplicar 10.000 por 10 y dividir por 100.", correcta: true },
+                    { texto: "Restar 10 a 10.000.", correcta: false }
+                ],
+                pista: "El 10% significa 10 de cada 100. Equivale a calcular la décima parte del valor.",
+                opciones: [
+                    {letra: "A", texto: "$1.000", correcta: true},
+                    {letra: "B", texto: "$9.000", correcta: false},
+                    {letra: "C", texto: "$100", correcta: false},
+                    {letra: "D", texto: "$10", correcta: false}
+                ]
+            },
+            {
+                id: 1031, subEjeId: "1.3", dificultad: "Elemental", 
+                texto: "Si en un curso hay 12 mujeres y 18 hombres, ¿cuál es la razón entre la cantidad de mujeres y el total de alumnos?",
+                plan_opciones: [
+                    { texto: "Sumar para obtener el total y luego armar la fracción mujeres / total y simplificar.", correcta: true },
+                    { texto: "Hacer la fracción mujeres / hombres directamente.", correcta: false }
+                ],
+                pista: "El total es 12 + 18 = 30. La razón que piden es 12 es a 30.",
+                opciones: [
+                    {letra: "A", texto: "2:5", correcta: true},
+                    {letra: "B", texto: "2:3", correcta: false},
+                    {letra: "C", texto: "12:18", correcta: false},
+                    {letra: "D", texto: "3:5", correcta: false}
+                ]
+            },
+            {
+                id: 1032, subEjeId: "1.3", dificultad: "Adecuado", 
+                texto: "Si un televisor con IVA (19%) cuesta $238.000, ¿cuál era su precio neto (sin IVA)?",
+                plan_opciones: [
+                    { texto: "Plantear que el precio neto (x) más el 19% de x es igual al precio final, o sea 1,19 * x = 238.000.", correcta: true },
+                    { texto: "Calcular el 19% de 238.000 y restarlo del total.", correcta: false }
+                ],
+                pista: "El precio total representa el 119% del precio original. Divide 238.000 entre 1.19",
+                opciones: [
+                    {letra: "A", texto: "$200.000", correcta: true},
+                    {letra: "B", texto: "$192.780", correcta: false},
+                    {letra: "C", texto: "$219.000", correcta: false},
+                    {letra: "D", texto: "$210.000", correcta: false}
+                ]
+            },
+
+            // --- EJE 2: ÁLGEBRA ---
+            // 2.1 Lenguaje algebraico
+            {
+                id: 2010, subEjeId: "2.1", dificultad: "Insuficiente", 
+                texto: "¿Cómo se escribe en lenguaje algebraico: 'el doble de un número aumentado en tres'?",
+                plan_opciones: [
+                    { texto: "Multiplicar una letra por 2 y luego sumar 3.", correcta: true },
+                    { texto: "Sumar 3 a una letra y luego multiplicar el resultado por 2.", correcta: false }
+                ],
+                pista: "El doble es 2x. Aumentado es sumar.",
+                opciones: [
+                    {letra: "A", texto: "2x + 3", correcta: true},
+                    {letra: "B", texto: "2(x + 3)", correcta: false},
+                    {letra: "C", texto: "x/2 + 3", correcta: false},
+                    {letra: "D", texto: "3x + 2", correcta: false}
+                ]
+            },
+            {
+                id: 201, subEjeId: "2.1", dificultad: "Elemental", 
+                texto: "Si el doble de un número se aumenta en 5, resulta el triple del mismo número disminuido en 2. ¿Cuál es el número?",
+                plan_opciones: [
+                    { texto: "Traducir el enunciado a una ecuación de primer grado del tipo 2x + 5 = 3x - 2 y despejar x.", correcta: true },
+                    { texto: "Probar números al azar sumando y restando hasta que las igualdades coincidan.", correcta: false }
+                ],
+                pista: "Identifica el número desconocido como 'x'. 'El doble' se escribe como 2x, 'aumentado' es sumar, y 'disminuido' es restar.",
+                opciones: [
+                    {letra: "A", texto: "7", correcta: true},
+                    {letra: "B", texto: "3", correcta: false},
+                    {letra: "C", texto: "5", correcta: false},
+                    {letra: "D", texto: "-3", correcta: false}
+                ]
+            },
+            {
+                id: 2012, subEjeId: "2.1", dificultad: "Adecuado", 
+                texto: "Si sumas tres números pares consecutivos y el resultado es 60, ¿cuál es el mayor de esos números?",
+                plan_opciones: [
+                    { texto: "Definir el primer número como 2x, el siguiente como 2x+2, el tercero como 2x+4 y sumarlos.", correcta: true },
+                    { texto: "Dividir 60 entre 3 directamente y elegir ese número.", correcta: false }
+                ],
+                pista: "Los números pares van de 2 en 2. x + (x+2) + (x+4) = 60. Encuentra x y luego suma 4.",
+                opciones: [
+                    {letra: "A", texto: "22", correcta: true},
+                    {letra: "B", texto: "20", correcta: false},
+                    {letra: "C", texto: "18", correcta: false},
+                    {letra: "D", texto: "24", correcta: false}
+                ]
+            },
+
+            // 2.2 Productos notables
+            {
+                id: 2020, subEjeId: "2.2", dificultad: "Insuficiente", 
+                texto: "Al multiplicar término a término (x + 2)(x + 3), ¿qué se obtiene?",
+                plan_opciones: [
+                    { texto: "Multiplicar todos contra todos y luego sumar términos semejantes.", correcta: true },
+                    { texto: "Multiplicar solo las X y luego solo los números.", correcta: false }
+                ],
+                pista: "x*x + x*3 + 2*x + 2*3. Suma las x del medio.",
+                opciones: [
+                    {letra: "A", texto: "x² + 5x + 6", correcta: true},
+                    {letra: "B", texto: "x² + 6", correcta: false},
+                    {letra: "C", texto: "2x + 5", correcta: false},
+                    {letra: "D", texto: "x² + x + 6", correcta: false}
+                ]
+            },
+            {
+                id: 2021, subEjeId: "2.2", dificultad: "Elemental", 
+                texto: "¿Cuál es el resultado de (x - 5)(x + 5)?",
+                plan_opciones: [
+                    { texto: "Aplicar el producto notable 'Suma por su diferencia', que resulta en el cuadrado del primero menos el cuadrado del segundo.", correcta: true },
+                    { texto: "Multiplicar todo y sumar obteniendo un trinomio.", correcta: false }
+                ],
+                pista: "(a+b)(a-b) siempre es a² - b². Los términos del medio se anulan.",
+                opciones: [
+                    {letra: "A", texto: "x² - 25", correcta: true},
+                    {letra: "B", texto: "x² + 25", correcta: false},
+                    {letra: "C", texto: "x² - 10x - 25", correcta: false},
+                    {letra: "D", texto: "2x - 25", correcta: false}
+                ]
+            },
+            {
+                id: 202, subEjeId: "2.2", dificultad: "Adecuado", 
+                texto: "Al desarrollar algebraicamente la expresión (x - 4)², ¿qué trinomio se obtiene?",
+                plan_opciones: [
+                    { texto: "Aplicar la fórmula del cuadrado de un binomio: el cuadrado del primero, menos el doble del primero por el segundo, más el cuadrado del segundo.", correcta: true },
+                    { texto: "Elevar al cuadrado la variable x y luego el número 4 de forma independiente.", correcta: false }
+                ],
+                pista: "Recuerda que (a - b)² = a² - 2ab + b². No se distribuye el exponente directamente hacia el interior del paréntesis.",
+                opciones: [
+                    {letra: "A", texto: "x² - 8x + 16", correcta: true},
+                    {letra: "B", texto: "x² - 16", correcta: false},
+                    {letra: "C", texto: "x² - 4x + 16", correcta: false},
+                    {letra: "D", texto: "x² + 8x + 16", correcta: false}
+                ]
+            },
+
+            // 2.3 Ecuaciones
+            {
+                id: 2030, subEjeId: "2.3", dificultad: "Insuficiente", 
+                texto: "Si x - 8 = 15, ¿cuál es el valor de x?",
+                plan_opciones: [
+                    { texto: "Pasar el 8 al lado derecho haciendo la operación contraria (sumar).", correcta: true },
+                    { texto: "Restar 8 a 15.", correcta: false }
+                ],
+                pista: "Debes despejar la X dejando sola esa letra. Suma 8 a ambos lados.",
+                opciones: [
+                    {letra: "A", texto: "23", correcta: true},
+                    {letra: "B", texto: "7", correcta: false},
+                    {letra: "C", texto: "-7", correcta: false},
+                    {letra: "D", texto: "120", correcta: false}
+                ]
+            },
+            {
+                id: 2031, subEjeId: "2.3", dificultad: "Elemental", 
+                texto: "Resuelve el sistema simple: x + y = 10  y  x - y = 2. ¿Cuánto vale x?",
+                plan_opciones: [
+                    { texto: "Sumar ambas ecuaciones hacia abajo (reducción) para eliminar la 'y'.", correcta: true },
+                    { texto: "Multiplicar ambas ecuaciones.", correcta: false }
+                ],
+                pista: "Si sumas (x+y) y (x-y), las 'y' desaparecen y te queda 2x = 12.",
+                opciones: [
+                    {letra: "A", texto: "6", correcta: true},
+                    {letra: "B", texto: "4", correcta: false},
+                    {letra: "C", texto: "8", correcta: false},
+                    {letra: "D", texto: "12", correcta: false}
+                ]
+            },
+            // Pregunta 2.3 parametrizada (generada dinámicamente) de nivel Adecuado
+            generarPreguntaSueldos(),
+
+            // 2.4 Funciones
+            {
+                id: 204, subEjeId: "2.4", dificultad: "Insuficiente", 
+                texto: "Dada la función afín f(x) = -3x + 5, ¿cuál es el valor de f(-2)?",
+                plan_opciones: [
+                    { texto: "Sustituir la variable x por el valor -2 en la regla de la función y resolver las operaciones respetando la ley de los signos.", correcta: true },
+                    { texto: "Despejar la variable x igualando toda la función a -2.", correcta: false }
+                ],
+                pista: "Evaluar la función significa reemplazar cada 'x' en la expresión por el número indicado entre paréntesis. ¡Cuidado con multiplicar dos números negativos!",
+                opciones: [
+                    {letra: "A", texto: "11", correcta: true},
+                    {letra: "B", texto: "-1", correcta: false},
+                    {letra: "C", texto: "-11", correcta: false},
+                    {letra: "D", texto: "1", correcta: false}
+                ]
+            },
+            {
+                id: 2041, subEjeId: "2.4", dificultad: "Elemental", 
+                texto: "En la función f(x) = 2x - 4, ¿en qué punto interseca la gráfica al eje Y?",
+                plan_opciones: [
+                    { texto: "Evaluar la función cuando x vale 0.", correcta: true },
+                    { texto: "Igualar la función a cero para despejar x.", correcta: false }
+                ],
+                pista: "El corte con el eje Y ocurre siempre donde x = 0. Se le llama coeficiente de posición.",
+                opciones: [
+                    {letra: "A", texto: "(0, -4)", correcta: true},
+                    {letra: "B", texto: "(2, 0)", correcta: false},
+                    {letra: "C", texto: "(-4, 0)", correcta: false},
+                    {letra: "D", texto: "(0, 2)", correcta: false}
+                ]
+            },
+            {
+                id: 2042, subEjeId: "2.4", dificultad: "Adecuado", 
+                texto: "El cobro de un taxista se modela con la función f(x) = 300x + 800, donde x son los kilómetros recorridos. Si un cliente paga $3.800, ¿cuántos kilómetros recorrió?",
+                plan_opciones: [
+                    { texto: "Igualar la función a 3800 (es decir f(x) = 3800) y despejar x.", correcta: true },
+                    { texto: "Reemplazar x por 3800 y multiplicar.", correcta: false }
+                ],
+                pista: "El pago de 3800 es el resultado de la función. Queda la ecuación: 300x + 800 = 3800.",
+                opciones: [
+                    {letra: "A", texto: "10", correcta: true},
+                    {letra: "B", texto: "12", correcta: false},
+                    {letra: "C", texto: "8", correcta: false},
+                    {letra: "D", texto: "15", correcta: false}
+                ]
+            },
+
+            // --- EJE 3: GEOMETRÍA ---
+            // 3.1 Proporcionalidad geométrica
+            {
+                id: 3010, subEjeId: "3.1", dificultad: "Insuficiente", 
+                texto: "Dos triángulos son semejantes. Si los lados del primero miden 3, 4 y 5, y el primer lado del segundo triángulo mide 6, ¿cuánto miden los otros dos lados?",
+                plan_opciones: [
+                    { texto: "Encontrar el factor de amplificación dividiendo los lados correspondientes y multiplicar los demás lados.", correcta: true },
+                    { texto: "Sumar 3 a los otros lados.", correcta: false }
+                ],
+                pista: "Si el lado 3 se convirtió en 6, se multiplicó por 2. Haz lo mismo con el 4 y el 5.",
+                opciones: [
+                    {letra: "A", texto: "8 y 10", correcta: true},
+                    {letra: "B", texto: "7 y 8", correcta: false},
+                    {letra: "C", texto: "12 y 15", correcta: false},
+                    {letra: "D", texto: "5 y 6", correcta: false}
+                ]
+            },
+            {
+                id: 301, subEjeId: "3.1", dificultad: "Elemental", 
+                texto: "En un plano a escala 1:50.000, dos ciudades están separadas por 4 cm. ¿Cuál es la distancia real entre ambas ciudades expresada en kilómetros?",
+                plan_opciones: [
+                    { texto: "Multiplicar la distancia del plano por el factor de escala para obtener la distancia real en centímetros, y luego hacer la conversión a kilómetros.", correcta: true },
+                    { texto: "Dividir los 50.000 entre 4 para obtener la distancia real directamente.", correcta: false }
+                ],
+                pista: "1 cm en el plano representa 50.000 cm en la realidad. Recuerda que 100.000 centímetros equivalen exactamente a 1 kilómetro.",
+                opciones: [
+                    {letra: "A", texto: "2 km", correcta: true},
+                    {letra: "B", texto: "20 km", correcta: false},
+                    {letra: "C", texto: "0,2 km", correcta: false},
+                    {letra: "D", texto: "200 km", correcta: false}
+                ]
+            },
+            {
+                id: 3012, subEjeId: "3.1", dificultad: "Adecuado", 
+                texto: "Utilizando el Teorema de Tales, si tres rectas paralelas son cortadas por dos transversales formando segmentos proporcionales, un segmento de 4cm es a 6cm como 10cm es a 'x'. ¿Cuánto vale 'x'?",
+                plan_opciones: [
+                    { texto: "Armar la proporción 4/6 = 10/x y despejar multiplicando cruzado.", correcta: true },
+                    { texto: "Sumar los valores conocidos.", correcta: false }
+                ],
+                pista: "Multiplica cruzado: 4 * x = 6 * 10.",
+                opciones: [
+                    {letra: "A", texto: "15", correcta: true},
+                    {letra: "B", texto: "12", correcta: false},
+                    {letra: "C", texto: "20", correcta: false},
+                    {letra: "D", texto: "24", correcta: false}
+                ]
+            },
+
+            // 3.2 Geometría Analítica
+            {
+                id: 3020, subEjeId: "3.2", dificultad: "Insuficiente", 
+                texto: "En el plano cartesiano, ¿qué coordenadas tiene el origen?",
+                plan_opciones: [
+                    { texto: "Recordar que es el punto donde se cruzan el eje X y el eje Y.", correcta: true },
+                    { texto: "Usar (1,1) como inicio.", correcta: false }
+                ],
+                pista: "El origen es el punto donde los valores de x e y son cero.",
+                opciones: [
+                    {letra: "A", texto: "(0,0)", correcta: true},
+                    {letra: "B", texto: "(1,0)", correcta: false},
+                    {letra: "C", texto: "(0,1)", correcta: false},
+                    {letra: "D", texto: "(1,1)", correcta: false}
+                ]
+            },
+            {
+                id: 3021, subEjeId: "3.2", dificultad: "Elemental", 
+                texto: "Si te mueves del punto (2, 3) tres unidades a la derecha y una unidad hacia arriba, ¿a qué punto llegas?",
+                plan_opciones: [
+                    { texto: "Sumar 3 a la coordenada X y sumar 1 a la coordenada Y.", correcta: true },
+                    { texto: "Restar los valores a las coordenadas originales.", correcta: false }
+                ],
+                pista: "Derecha afecta al primer número (X) sumando. Arriba afecta al segundo número (Y) sumando.",
+                opciones: [
+                    {letra: "A", texto: "(5, 4)", correcta: true},
+                    {letra: "B", texto: "(5, 2)", correcta: false},
+                    {letra: "C", texto: "(-1, 4)", correcta: false},
+                    {letra: "D", texto: "(6, 3)", correcta: false}
+                ]
+            },
+            {
+                id: 302, subEjeId: "3.2", dificultad: "Adecuado", 
+                texto: "¿Cuál es la distancia entre los puntos A(1, 2) y B(4, 6) en el plano cartesiano?",
+                plan_opciones: [
+                    { texto: "Utilizar la fórmula de distancia entre dos puntos, calculando la diferencia de las coordenadas para aplicar el Teorema de Pitágoras.", correcta: true },
+                    { texto: "Sumar directamente las coordenadas x con las coordenadas y para encontrar una magnitud escalar.", correcta: false }
+                ],
+                pista: "La fórmula de distancia es d = √[(x₂ - x₁)² + (y₂ - y₁)²]. Evalúa primero las diferencias horizontales y verticales.",
+                opciones: [
+                    {letra: "A", texto: "5", correcta: true},
+                    {letra: "B", texto: "4", correcta: false},
+                    {letra: "C", texto: "3", correcta: false},
+                    {letra: "D", texto: "25", correcta: false}
+                ]
+            },
+
+            // 3.3 Perímetro, Área y Volumen
+            {
+                id: 3030, subEjeId: "3.3", dificultad: "Insuficiente", 
+                texto: "El perímetro de un cuadrado es 20 cm. ¿Cuánto mide su área?",
+                plan_opciones: [
+                    { texto: "Dividir el perímetro por 4 para sacar el lado, y luego multiplicar lado por lado.", correcta: true },
+                    { texto: "Multiplicar el perímetro por sí mismo.", correcta: false }
+                ],
+                pista: "Si los 4 lados suman 20, cada lado mide 5. El área es Lado x Lado.",
+                opciones: [
+                    {letra: "A", texto: "25 cm²", correcta: true},
+                    {letra: "B", texto: "100 cm²", correcta: false},
+                    {letra: "C", texto: "40 cm²", correcta: false},
+                    {letra: "D", texto: "10 cm²", correcta: false}
+                ]
+            },
+            {
+                id: 3031, subEjeId: "3.3", dificultad: "Elemental", 
+                texto: "El área de un círculo se calcula como π * r². Si el radio es 4 cm, ¿cuál es su área?",
+                plan_opciones: [
+                    { texto: "Elevar el 4 al cuadrado primero y dejar indicado el símbolo de pi.", correcta: true },
+                    { texto: "Multiplicar 4 por 2 y luego por pi.", correcta: false }
+                ],
+                pista: "Elevar al cuadrado significa 4 * 4.",
+                opciones: [
+                    {letra: "A", texto: "16π cm²", correcta: true},
+                    {letra: "B", texto: "8π cm²", correcta: false},
+                    {letra: "C", texto: "4π cm²", correcta: false},
+                    {letra: "D", texto: "12π cm²", correcta: false}
+                ]
+            },
+            {
+                id: 303, subEjeId: "3.3", dificultad: "Adecuado", 
+                texto: "El volumen de un cilindro es 150π cm³ y su altura es 6 cm. ¿Cuánto mide el radio de su base?",
+                plan_opciones: [
+                    { texto: "Reemplazar los datos conocidos en la fórmula del volumen del cilindro (V = π·r²·h) y despejar el radio al cuadrado.", correcta: true },
+                    { texto: "Dividir el volumen total por la altura y tomar ese resultado como el radio definitivo.", correcta: false }
+                ],
+                pista: "Iguala 150π con π·r²·6. Simplifica el símbolo π en ambos lados y divide por 6 para encontrar el valor de r².",
+                opciones: [
+                    {letra: "A", texto: "5 cm", correcta: true},
+                    {letra: "B", texto: "25 cm", correcta: false},
+                    {letra: "C", texto: "10 cm", correcta: false},
+                    {letra: "D", texto: "15 cm", correcta: false}
+                ]
+            },
+
+            // 3.4 Ángulos y Teorema de Pitágoras
+            {
+                id: 3040, subEjeId: "3.4", dificultad: "Insuficiente", 
+                texto: "En cualquier triángulo, ¿cuánto suman los ángulos interiores?",
+                plan_opciones: [
+                    { texto: "Recordar la propiedad básica de la suma de ángulos de un triángulo.", correcta: true },
+                    { texto: "Depende del tamaño del triángulo.", correcta: false }
+                ],
+                pista: "Es un valor fijo e igual a un ángulo extendido.",
+                opciones: [
+                    {letra: "A", texto: "180°", correcta: true},
+                    {letra: "B", texto: "360°", correcta: false},
+                    {letra: "C", texto: "90°", correcta: false},
+                    {letra: "D", texto: "270°", correcta: false}
+                ]
+            },
+            {
+                id: 304, subEjeId: "3.4", dificultad: "Elemental", 
+                texto: "Una escalera de 5 metros de largo está apoyada sobre una pared vertical. Si la base de la escalera se encuentra a 3 metros de la base de la pared, ¿a qué altura de la pared llega la escalera?",
+                plan_opciones: [
+                    { texto: "Modelar la situación con un triángulo rectángulo, donde la escalera es la hipotenusa, y usar el Teorema de Pitágoras para hallar el cateto faltante.", correcta: true },
+                    { texto: "Restar linealmente los 3 metros a los 5 metros de la escalera para obtener la altura.", correcta: false }
+                ],
+                pista: "El teorema establece que c² = a² + b², donde 'c' es la hipotenusa (la escalera). En este caso buscas un cateto, por lo que debes calcular 5² - 3².",
+                opciones: [
+                    {letra: "A", texto: "4 metros", correcta: true},
+                    {letra: "B", texto: "2 metros", correcta: false},
+                    {letra: "C", texto: "8 metros", correcta: false},
+                    {letra: "D", texto: "16 metros", correcta: false}
+                ]
+            },
+            {
+                id: 3042, subEjeId: "3.4", dificultad: "Adecuado", 
+                texto: "Si un rombo tiene diagonales que miden 12 cm y 16 cm, ¿cuánto mide cada lado del rombo?",
+                plan_opciones: [
+                    { texto: "Usar el hecho de que las diagonales se cortan en su punto medio formando 4 triángulos rectángulos, y aplicar Pitágoras.", correcta: true },
+                    { texto: "Promediar las diagonales para sacar el lado.", correcta: false }
+                ],
+                pista: "Los catetos de uno de los triángulos rectángulos miden la mitad de las diagonales: 6 y 8. Calcula la hipotenusa.",
+                opciones: [
+                    {letra: "A", texto: "10 cm", correcta: true},
+                    {letra: "B", texto: "14 cm", correcta: false},
+                    {letra: "C", texto: "20 cm", correcta: false},
+                    {letra: "D", texto: "12 cm", correcta: false}
+                ]
+            },
+
+            // --- EJE 4: DATOS Y AZAR ---
+            // 4.1 Representación de datos
+            {
+                id: 401, subEjeId: "4.1", dificultad: "Insuficiente", 
+                texto: "Un gráfico circular muestra las preferencias deportivas de 200 estudiantes. Si el sector correspondiente a natación tiene un ángulo central de 90°, ¿cuántos estudiantes prefieren natación?",
+                plan_opciones: [
+                    { texto: "Relacionar los 90° con el total de 360° del círculo para encontrar la proporción en fracción y multiplicarla por el total de estudiantes.", correcta: true },
+                    { texto: "Asumir que los 90 grados equivalen directamente a 90 estudiantes.", correcta: false }
+                ],
+                pista: "Un círculo completo tiene 360°. Por lo tanto, un ángulo de 90° representa exactamente un cuarto (1/4) del total de la muestra.",
+                opciones: [
+                    {letra: "A", texto: "50", correcta: true},
+                    {letra: "B", texto: "90", correcta: false},
+                    {letra: "C", texto: "25", correcta: false},
+                    {letra: "D", texto: "100", correcta: false}
+                ]
+            },
+            {
+                id: 4011, subEjeId: "4.1", dificultad: "Elemental", 
+                texto: "En un pictograma, un ícono de una persona equivale a 1.000 habitantes. Si hay 4 íconos completos y medio ícono, ¿cuántos habitantes hay en total?",
+                plan_opciones: [
+                    { texto: "Multiplicar el valor del ícono entero por la cantidad mostrada (4,5).", correcta: true },
+                    { texto: "Sumar 1000 con el número de íconos mostrados.", correcta: false }
+                ],
+                pista: "4 completos = 4.000. El medio ícono vale la mitad de 1.000.",
+                opciones: [
+                    {letra: "A", texto: "4.500", correcta: true},
+                    {letra: "B", texto: "4.050", correcta: false},
+                    {letra: "C", texto: "5.000", correcta: false},
+                    {letra: "D", texto: "4.250", correcta: false}
+                ]
+            },
+            {
+                id: 4012, subEjeId: "4.1", dificultad: "Adecuado", 
+                texto: "Si en un histograma de frecuencias un intervalo (barras juntas) tiene el doble de altura que otro, ¿qué significa esto?",
+                plan_opciones: [
+                    { texto: "Que la frecuencia absoluta de ese intervalo es el doble que la del otro.", correcta: true },
+                    { texto: "Que los datos en ese intervalo valen el doble numéricamente.", correcta: false }
+                ],
+                pista: "La altura en un histograma representa cuántas veces se repite el dato, es decir, la frecuencia.",
+                opciones: [
+                    {letra: "A", texto: "Tiene el doble de frecuencia.", correcta: true},
+                    {letra: "B", texto: "Sus valores son más altos.", correcta: false},
+                    {letra: "C", texto: "El rango es más grande.", correcta: false},
+                    {letra: "D", texto: "El promedio es el doble.", correcta: false}
+                ]
+            },
+
+            // 4.2 Estadística
+            {
+                id: 4020, subEjeId: "4.2", dificultad: "Insuficiente", 
+                texto: "Para encontrar el promedio (media aritmética) de los números 2, 4, 6 y 8, debes:",
+                plan_opciones: [
+                    { texto: "Sumar todos los datos y dividir por la cantidad total de datos (4).", correcta: true },
+                    { texto: "Tomar el número del medio de la lista.", correcta: false }
+                ],
+                pista: "Suma 2+4+6+8 y luego divide en 4.",
+                opciones: [
+                    {letra: "A", texto: "5", correcta: true},
+                    {letra: "B", texto: "6", correcta: false},
+                    {letra: "C", texto: "4", correcta: false},
+                    {letra: "D", texto: "20", correcta: false}
+                ]
+            },
+            {
+                id: 4021, subEjeId: "4.2", dificultad: "Elemental", 
+                texto: "En el conjunto de datos: 3, 5, 5, 7, 8. ¿Cuál es la mediana?",
+                plan_opciones: [
+                    { texto: "Como están ordenados, identificar el número que queda exactamente en el centro.", correcta: true },
+                    { texto: "Encontrar el que más se repite.", correcta: false }
+                ],
+                pista: "Son 5 datos, el del medio es el tercero.",
+                opciones: [
+                    {letra: "A", texto: "5", correcta: true},
+                    {letra: "B", texto: "6", correcta: false},
+                    {letra: "C", texto: "7", correcta: false},
+                    {letra: "D", texto: "5,6", correcta: false}
+                ]
+            },
+            {
+                id: 402, subEjeId: "4.2", dificultad: "Adecuado", 
+                texto: "Las notas de un estudiante son: 4.5, 5.0, 5.5, 6.0 y una quinta nota desconocida. Si su promedio final debe ser exactamente 5.4, ¿cuál debe ser su quinta nota?",
+                plan_opciones: [
+                    { texto: "Plantear una ecuación donde la suma de todas las notas, dividida por 5, sea igual a 5.4.", correcta: true },
+                    { texto: "Promediar las cuatro notas conocidas y sumar la diferencia decimal que falta para llegar a 5.4.", correcta: false }
+                ],
+                pista: "El total de puntos acumulados necesarios se calcula multiplicando el promedio deseado (5.4) por la cantidad total de notas (5).",
+                opciones: [
+                    {letra: "A", texto: "6.0", correcta: true},
+                    {letra: "B", texto: "5.8", correcta: false},
+                    {letra: "C", texto: "5.5", correcta: false},
+                    {letra: "D", texto: "6.2", correcta: false}
+                ]
+            },
+
+            // 4.3 Probabilidades
+            {
+                id: 4030, subEjeId: "4.3", dificultad: "Insuficiente", 
+                texto: "Al lanzar una moneda al aire, ¿cuál es la probabilidad de que salga 'Cara'?",
+                plan_opciones: [
+                    { texto: "Usar la regla de Laplace: casos favorables dividido por casos totales posibles.", correcta: true },
+                    { texto: "Anotar el número de intentos que se hagan.", correcta: false }
+                ],
+                pista: "La moneda tiene 2 lados, y 'Cara' es 1 de esos lados.",
+                opciones: [
+                    {letra: "A", texto: "1/2", correcta: true},
+                    {letra: "B", texto: "1/3", correcta: false},
+                    {letra: "C", texto: "2/1", correcta: false},
+                    {letra: "D", texto: "1", correcta: false}
+                ]
+            },
+            {
+                id: 403, subEjeId: "4.3", dificultad: "Elemental", 
+                texto: "Al lanzar un dado normal de 6 caras y una moneda tradicional al mismo tiempo, ¿cuál es la probabilidad de obtener un número par en el dado y sello en la moneda?",
+                plan_opciones: [
+                    { texto: "Determinar las probabilidades individuales de ambos eventos por separado y luego multiplicarlas, ya que son eventos independientes.", correcta: true },
+                    { texto: "Sumar la probabilidad de obtener un número par con la probabilidad de obtener sello.", correcta: false }
+                ],
+                pista: "La probabilidad de obtener un número par es 3/6 (o 1/2), y la de obtener sello es 1/2. Cuando se busca que ocurran ambos eventos independientes al mismo tiempo, se multiplican.",
+                opciones: [
+                    {letra: "A", texto: "1/4", correcta: true},
+                    {letra: "B", texto: "1/2", correcta: false},
+                    {letra: "C", texto: "3/4", correcta: false},
+                    {letra: "D", texto: "1/12", correcta: false}
+                ]
+            },
+            {
+                id: 4032, subEjeId: "4.3", dificultad: "Adecuado", 
+                texto: "En una urna hay 4 bolas rojas, 3 azules y 3 verdes. Se saca una bola al azar y NO se devuelve. Luego se saca otra bola. ¿Cuál es la probabilidad de que ambas bolas sean rojas?",
+                plan_opciones: [
+                    { texto: "Multiplicar la probabilidad del primer evento por la probabilidad del segundo, ajustando el número total de bolas para la segunda extracción (sin reposición).", correcta: true },
+                    { texto: "Calcular la probabilidad de la primera roja y duplicarla.", correcta: false }
+                ],
+                pista: "La primera bola tiene prob. 4/10. Si ya sacaste una roja, quedan 3 rojas en la urna, y un total de 9 bolas. Multiplica 4/10 * 3/9.",
+                opciones: [
+                    {letra: "A", texto: "12/90 (o 2/15)", correcta: true},
+                    {letra: "B", texto: "16/100", correcta: false},
+                    {letra: "C", texto: "7/19", correcta: false},
+                    {letra: "D", texto: "4/9", correcta: false}
+                ]
+            }
+        ];
+
+        // 3. STATE VARIABLES
+        let activeQuestions = [];
+        let currentQuestionIndex = 0;
+        let userStats = { xp: 320, confidence: 75, streak: 4 };
+        let selectedPlanOption = null;
+        let selectedExecOption = null;
+
+        // 4. UI FUNCTIONS
+        function showSection(sectionId) {
+            // Agregamos 'section-matriz' a la lista
+           // Reemplaza la línea del forEach existente por esta:
+          ['section-dashboard', 'section-seleccionar_mision', 'section-missions', 'section-calm', 'section-kahooma', 'section-matriz', 'section-semejanza', 'section-grafico-expresion'].forEach(id => {
+          // ... el resto de la función queda igual
+                const el = document.getElementById(id);
+                if(el) {
+                    el.classList.add('hidden');
+                    el.classList.remove('block');
+                }
+            });
+            const targetEl = document.getElementById(`section-${sectionId}`);
+            if(targetEl) {
+                targetEl.classList.remove('hidden');
+                targetEl.classList.add('block');
+            }
+            
+            // Update nav styles
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-brand-600', 'dark:text-brand-400', 'bg-brand-50', 'dark:bg-brand-900/30');
+                btn.classList.add('text-slate-600', 'dark:text-slate-300');
+            });
+            const targetNav = document.getElementById(`nav-${sectionId}`);
+            if(targetNav) {
+                targetNav.classList.add('text-brand-600', 'dark:text-brand-400', 'bg-brand-50', 'dark:bg-brand-900/30');
+                targetNav.classList.remove('text-slate-600', 'dark:text-slate-300');
+            }
+        }
+
+        function updateStatsUI() {
+            document.getElementById('user-xp').innerText = `${userStats.xp}`;
+            document.getElementById('user-confidence').innerText = userStats.confidence;
+            document.getElementById('user-streak').innerText = userStats.streak;
+            
+            document.getElementById('user-xp-mobile').innerText = `${userStats.xp} XP`;
+            document.getElementById('user-confidence-mobile').innerText = `${userStats.confidence}%`;
+            document.getElementById('user-streak-mobile').innerText = `${userStats.streak} d`;
+
+            const dashConfText = document.getElementById('dash-confidence-text');
+            if(dashConfText) dashConfText.innerText = `${userStats.confidence} / 100 PTS`;
+            const dashConfBar = document.getElementById('dash-confidence-bar');
+            if(dashConfBar) dashConfBar.style.width = `${userStats.confidence}%`;
+        }
+
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            const icon = document.getElementById('theme-icon');
+            if (document.documentElement.classList.contains('dark')) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+        }
+
+        // 5. CASCADING SELECTORS LOGIC
+        function actualizarSubEjes() {
+            const ejeSeleccionado = document.getElementById('selector-eje').value;
+            const subEjeSelector = document.getElementById('selector-subeje');
+            const btnComenzar = document.getElementById('btn-comenzar-mision');
+            
+            subEjeSelector.innerHTML = '<option value="" disabled selected>Elige un sub-eje...</option>';
+            
+            if(ejeSeleccionado && estructuraSimce[ejeSeleccionado]) {
+                subEjeSelector.disabled = false;
+                estructuraSimce[ejeSeleccionado].subEjes.forEach(sub => {
+                    const opt = document.createElement('option');
+                    opt.value = sub.id;
+                    opt.textContent = `${sub.id} - ${sub.nombre}`;
+                    subEjeSelector.appendChild(opt);
+                });
+                
+                // Add event listener to enable the button once sub-eje is selected
+                subEjeSelector.onchange = () => {
+                    btnComenzar.disabled = false;
+                };
+                btnComenzar.disabled = true; // reset button
+            } else {
+                subEjeSelector.disabled = true;
+                btnComenzar.disabled = true;
+            }
+        }
+
+        function iniciarMisionPersonalizada() {
+            const subEjeId = document.getElementById('selector-subeje').value;
+            const ejeKey = document.getElementById('selector-eje').value;
+            
+            if(!subEjeId) return;
+
+            // 1. Filtrar preguntas por el sub-eje seleccionado
+            const preguntasFiltradas = bancoPreguntas.filter(p => p.subEjeId === subEjeId);
+            
+            if(preguntasFiltradas.length === 0) {
+                alert("Aún no hay preguntas cargadas en el sistema para este sub-eje. Prueba con otro.");
+                return;
+            }
+
+            // 2. Ordenar por dificultad ascendente
+            activeQuestions = preguntasFiltradas.sort((a, b) => {
+                return nivelesDificultad[a.dificultad] - nivelesDificultad[b.dificultad];
+            }).slice(0, 5); // Limitar a 5 max
+
+            // 3. Obtener nombres para UI
+            const ejeNombre = estructuraSimce[ejeKey].nombre;
+            const subEjeNombre = estructuraSimce[ejeKey].subEjes.find(s => s.id === subEjeId).nombre;
+
+            // 4. Configurar Misión UI
+            currentQuestionIndex = 0;
+            document.getElementById('mission-eje-tag').innerText = ejeNombre;
+            document.getElementById('mission-title').innerText = subEjeNombre;
+            
+            showSection('missions');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = activeQuestions[currentQuestionIndex];
+            
+            // Update UI Counters
+            document.getElementById('mission-progress-text').innerText = `${currentQuestionIndex + 1}/${activeQuestions.length}`;
+            document.getElementById('problem-text').innerText = q.texto;
+            
+            // Badge Dificultad
+            const badge = document.getElementById('dificultad-badge');
+            badge.innerText = `Nivel: ${q.dificultad}`;
+            badge.className = "text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ";
+            if(q.dificultad === 'Insuficiente') badge.className += "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300";
+            if(q.dificultad === 'Elemental') badge.className += "bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300";
+            if(q.dificultad === 'Adecuado') badge.className += "bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300";
+
+            // Reset Steps
+            document.getElementById('metacognitive-step-1').classList.remove('hidden');
+            document.getElementById('metacognitive-step-2').classList.add('hidden');
+            document.getElementById('metacognitive-step-3').classList.add('hidden');
+            
+            updateStepTabs(1);
+            
+            // Populate Step 1 (Planificación)
+            selectedPlanOption = null;
+            document.getElementById('btn-submit-step1').disabled = true;
+            const planContainer = document.getElementById('plan-options');
+            planContainer.innerHTML = '';
+            
+            // Randomize plan options
+            const plans = [...q.plan_opciones].sort(() => Math.random() - 0.5);
+            plans.forEach((p, idx) => {
+                const div = document.createElement('div');
+                div.className = "p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer hover:border-brand-400 transition flex gap-3 items-center plan-opt";
+                div.onclick = () => selectPlanOption(div, p.correcta);
+                div.innerHTML = `<div class="w-4 h-4 rounded-full border-2 border-slate-300 dark:border-slate-600 flex-shrink-0 indicator"></div><p class="text-sm font-medium text-slate-700 dark:text-slate-200">${p.texto}</p>`;
+                planContainer.appendChild(div);
+            });
+
+            // Populate Step 2 (Ejecución)
+            document.getElementById('hint-box').classList.add('hidden');
+            document.getElementById('hint-text').innerText = q.pista;
+            
+            selectedExecOption = null;
+            document.getElementById('btn-submit-step2').disabled = true;
+            const execContainer = document.getElementById('execution-options');
+            execContainer.innerHTML = '';
+            
+            q.opciones.forEach((opt) => {
+                const div = document.createElement('div');
+                div.className = "p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer hover:border-brand-400 transition flex gap-3 items-center exec-opt";
+                div.onclick = () => selectExecOption(div, opt.correcta);
+div.innerHTML = `<div class="w-6 h-6 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 font-bold flex items-center justify-center text-xs indicator-letra">${opt.letra}</div><p class="text-sm font-medium text-slate-700 dark:text-slate-200 break-words w-full overflow-hidden">${opt.texto}</p>`;                execContainer.appendChild(div);
+            });
+        }
+
+        function selectPlanOption(element, isCorrect) {
+            document.querySelectorAll('.plan-opt').forEach(el => {
+                el.classList.remove('border-brand-500', 'bg-brand-50', 'dark:bg-brand-900/20');
+                el.querySelector('.indicator').classList.remove('bg-brand-500', 'border-brand-500');
+            });
+            element.classList.add('border-brand-500', 'bg-brand-50', 'dark:bg-brand-900/20');
+            element.querySelector('.indicator').classList.add('bg-brand-500', 'border-brand-500');
+            
+            selectedPlanOption = isCorrect;
+            document.getElementById('btn-submit-step1').disabled = false;
+        }
+
+        function selectExecOption(element, isCorrect) {
+            document.querySelectorAll('.exec-opt').forEach(el => {
+                el.classList.remove('border-brand-500', 'bg-brand-50', 'dark:bg-brand-900/20');
+                el.querySelector('.indicator-letra').classList.remove('bg-brand-500', 'text-white');
+                el.querySelector('.indicator-letra').classList.add('bg-slate-100', 'dark:bg-slate-700', 'text-slate-500');
+            });
+            element.classList.add('border-brand-500', 'bg-brand-50', 'dark:bg-brand-900/20');
+            element.querySelector('.indicator-letra').classList.remove('bg-slate-100', 'dark:bg-slate-700', 'text-slate-500');
+            element.querySelector('.indicator-letra').classList.add('bg-brand-500', 'text-white');
+            
+            selectedExecOption = isCorrect;
+            document.getElementById('btn-submit-step2').disabled = false;
+        }
+
+        function toggleHint() {
+            const box = document.getElementById('hint-box');
+            if(box.classList.contains('hidden')) {
+                box.classList.remove('hidden');
+            }
+        }
+
+        function validateStep1() {
+            document.getElementById('metacognitive-step-1').classList.add('hidden');
+            document.getElementById('metacognitive-step-2').classList.remove('hidden');
+            updateStepTabs(2);
+        }
+
+        function validateStep2() {
+            document.getElementById('metacognitive-step-2').classList.add('hidden');
+            document.getElementById('metacognitive-step-3').classList.remove('hidden');
+            updateStepTabs(3);
+            
+            const fbBox = document.getElementById('feedback-box');
+            const fbTitle = document.getElementById('feedback-title');
+            const fbMsg = document.getElementById('feedback-message');
+            const fbIcon = document.getElementById('feedback-icon');
+
+            if(selectedExecOption === true) {
+                userStats.xp += 20;
+                userStats.confidence = Math.min(100, userStats.confidence + 5);
+                
+                fbBox.className = "p-5 rounded-xl border border-emerald-300 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-900 dark:text-emerald-100";
+                fbIcon.className = "w-10 h-10 rounded-full flex items-center justify-center text-xl text-white bg-emerald-500 shadow-md";
+                fbIcon.innerHTML = '<i class="fa-solid fa-check"></i>';
+                fbTitle.innerText = "¡Excelente deducción!";
+                
+                if (selectedPlanOption) {
+                    fbMsg.innerText = "Tu estrategia inicial fue correcta y te llevó directo al resultado. ¡Confía en tus procesos!";
+                } else {
+                    fbMsg.innerText = "Llegaste a la respuesta correcta, aunque tu plan inicial no era el más óptimo. ¡Gran capacidad de ajuste sobre la marcha!";
+                }
+                
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            } else {
+                userStats.confidence = Math.max(0, userStats.confidence - 2);
+                
+                fbBox.className = "p-5 rounded-xl border border-rose-300 bg-rose-50 dark:bg-rose-900/30 text-rose-900 dark:text-rose-100";
+                fbIcon.className = "w-10 h-10 rounded-full flex items-center justify-center text-xl text-white bg-rose-500 shadow-md";
+                fbIcon.innerHTML = '<i class="fa-solid fa-rotate-left"></i>';
+                fbTitle.innerText = "Ruta de Rescate Activada";
+                
+                fbMsg.innerText = "La alternativa no es la correcta, pero este es el mejor momento para aprender. Revisa la pista de apoyo nuevamente e identifica qué paso del plan falló. El error es solo información.";
+            }
+
+            if(currentQuestionIndex === activeQuestions.length - 1) {
+                document.getElementById('btn-next-text').innerText = "Finalizar Misión";
+            } else {
+                document.getElementById('btn-next-text').innerText = "Siguiente Pregunta";
+            }
+
+            updateStatsUI();
+        }
+
+        function nextQuestion() {
+            if(currentQuestionIndex < activeQuestions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+            } else {
+                alert("¡Misión Completada! Has ganado XP y aumentado tu confianza matemática.");
+                showSection('dashboard');
+                // Reset selector dropdowns
+                document.getElementById('selector-eje').value = "";
+                document.getElementById('selector-subeje').innerHTML = '<option value="" disabled selected>Primero elige un eje...</option>';
+                document.getElementById('selector-subeje').disabled = true;
+                document.getElementById('btn-comenzar-mision').disabled = true;
+            }
+        }
+
+        function updateStepTabs(step) {
+            for(let i=1; i<=3; i++) {
+                const tab = document.getElementById(`step-tab-${i}`);
+                if (i === step) {
+                    tab.className = "p-3 rounded-xl border-2 border-brand-500 bg-brand-50/50 dark:bg-brand-900/20 text-center transition";
+                    tab.querySelector('div:first-child').className = "text-[10px] font-bold text-brand-600 dark:text-brand-300 uppercase";
+                } else if (i < step) {
+                    tab.className = "p-3 rounded-xl border-2 border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/20 text-center transition";
+                    tab.querySelector('div:first-child').className = "text-[10px] font-bold text-emerald-600 dark:text-emerald-300 uppercase";
+                    tab.querySelector('div:first-child').innerHTML = `<i class="fa-solid fa-check"></i> Paso ${i}`;
+                } else {
+                    tab.className = "p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-center transition opacity-60";
+                    tab.querySelector('div:first-child').className = "text-[10px] font-bold text-slate-400 uppercase";
+                    tab.querySelector('div:first-child').innerHTML = `Paso ${i}`;
+                }
+            }
+        }
+// ---------------------------------------------
+        // MOTOR DEL JUEGO KAHOOMA (NIVEL 1: SUMAS)
+        // ---------------------------------------------
+        let kahoomaState = {};
+
+function initKahooma() {
+    const container = document.getElementById('kahooma-container');
+    if(!container) return;
+    container.innerHTML = '';
+    kahoomaState = {};
+
+    for(let i = 0; i < 3; i++) {
+        let target, options;
+        let validPairFound = false;
+
+        // Algoritmo para garantizar UNA Y SÓLO UNA pareja correcta
+        while (!validPairFound) {
+            // Generar número objetivo principal que puede ser negativo (ej: entre -50 y 50)
+            let tempTarget = Math.floor(Math.random() * 101) - 50; 
+            let tempOptions = [];
+            
+            while(tempOptions.length < 5) {
+                // Generar números elegibles que también pueden ser negativos (ej: entre -50 y 50)
+                let num = Math.floor(Math.random() * 101) - 50;
+                if(!tempOptions.includes(num)) tempOptions.push(num);
+            }
+            
+            let pairCount = 0;
+            for(let x = 0; x < 5; x++) {
+                for(let y = x + 1; y < 5; y++) {
+                    // Validar si la suma de ambos (incluyendo negativos) da el objetivo
+                    if(tempOptions[x] + tempOptions[y] === tempTarget) pairCount++;
+                }
+            }
+            
+            if (pairCount === 1) {
+                target = tempTarget;
+                options = tempOptions;
+                validPairFound = true;
+            }
+        }
+
+        kahoomaState[i] = { target: target, options: options, selected: [], solved: false };
+        container.appendChild(buildKahoomaDOM(i, target, options));
+    }
+}
+
+        function buildKahoomaDOM(boardId, target, options) {
+            const boardDiv = document.createElement('div');
+            boardDiv.className = "relative w-48 h-48 sm:w-56 sm:h-56 mx-auto";
+
+            // Nodo Central
+            const center = document.createElement('div');
+            center.id = `kahooma-center-${boardId}`;
+            center.className = "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 sm:w-16 sm:h-16 bg-fuchsia-600 text-white rounded-full flex items-center justify-center text-xl font-bold shadow-lg shadow-fuchsia-500/40 z-10 transition-colors duration-500";
+            center.innerText = target;
+            boardDiv.appendChild(center);
+
+            // Posiciones en forma de Pentágono usando Tailwind
+            const positions = [
+                "top-0 left-1/2 -translate-x-1/2",           // Arriba centro
+                "top-[35%] -right-2 sm:-right-4",            // Derecha arriba
+                "bottom-0 right-[10%]",                      // Derecha abajo
+                "bottom-0 left-[10%]",                       // Izquierda abajo
+                "top-[35%] -left-2 sm:-left-4"               // Izquierda arriba
+            ];
+
+            options.forEach((val, idx) => {
+                const node = document.createElement('div');
+                node.id = `k-node-${boardId}-${idx}`;
+                node.className = `absolute ${positions[idx]} w-12 h-12 bg-white dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 text-slate-800 dark:text-slate-100 rounded-full flex items-center justify-center font-bold shadow-md cursor-pointer transition-all duration-300 hover:scale-110 hover:border-fuchsia-400 select-none`;
+                node.innerText = val;
+                node.onclick = () => selectKahoomaNode(boardId, idx, val);
+                boardDiv.appendChild(node);
+            });
+
+            return boardDiv;
+        }
+
+function selectKahoomaNode(boardId, nodeIdx, val) {
+    const board = kahoomaState[boardId];
+    if (board.solved) return;
+
+    const nodeEl = document.getElementById(`k-node-${boardId}-${nodeIdx}`);
+    const centerEl = document.getElementById(`kahooma-center-${boardId}`);
+
+    // 1. LÓGICA DE DESELECCIÓN: Verificar si ya estaba seleccionado
+    const selIndex = board.selected.findIndex(item => item.idx === nodeIdx);
+    if (selIndex > -1) {
+        // Remover del estado
+        board.selected.splice(selIndex, 1);
+        // Remover estilos de selección
+        nodeEl.classList.remove('bg-fuchsia-100', 'border-fuchsia-500', 'text-fuchsia-700', 'dark:bg-fuchsia-900/40', 'dark:text-fuchsia-300', 'scale-110');
+        return; // Salir de la función para no volver a seleccionarlo
+    }
+
+    // 2. LÓGICA DE SELECCIÓN: Agregar si hay menos de 2 seleccionados
+    if (board.selected.length < 2) {
+        board.selected.push({ idx: nodeIdx, val: val });
+        nodeEl.classList.add('bg-fuchsia-100', 'border-fuchsia-500', 'text-fuchsia-700', 'dark:bg-fuchsia-900/40', 'dark:text-fuchsia-300', 'scale-110');
+    }
+
+    // 3. EVALUACIÓN FINAL: Si ya se eligieron 2 nodos
+    if (board.selected.length === 2) {
+        // Como ahora son números negativos, la suma algebraica normal funcionará perfectamente (ej: -15 + 5 = -10)
+        const sum = board.selected[0].val + board.selected[1].val;
+        
+        if (sum === board.target) {
+            // ¡Respuesta Correcta!
+            board.solved = true;
+            centerEl.classList.remove('bg-fuchsia-600');
+            centerEl.classList.add('bg-emerald-500');
+            centerEl.innerHTML = '<i class="fa-solid fa-check text-2xl"></i>';
+            
+            board.selected.forEach(item => {
+                const el = document.getElementById(`k-node-${boardId}-${item.idx}`);
+                el.classList.remove('border-fuchsia-500', 'bg-fuchsia-100', 'text-fuchsia-700');
+                el.classList.add('border-emerald-500', 'bg-emerald-100', 'text-emerald-700', 'dark:bg-emerald-900/40', 'dark:text-emerald-300');
+            });
+            
+            userStats.xp += 15;
+            updateStatsUI();
+            if(typeof confetti === 'function') confetti({ particleCount: 40, spread: 50, origin: { y: 0.7 } });
+            
+        } else {
+            // Respuesta Incorrecta: animar temblor y reiniciar
+            board.selected.forEach(item => {
+                const el = document.getElementById(`k-node-${boardId}-${item.idx}`);
+                el.classList.remove('border-fuchsia-500', 'bg-fuchsia-100');
+                el.classList.add('border-rose-500', 'bg-rose-100', 'text-rose-700', '-translate-y-1', 'translate-x-1');
+                
+                setTimeout(() => {
+                    el.classList.remove('border-rose-500', 'bg-rose-100', 'text-rose-700', '-translate-y-1', 'translate-x-1', 'text-fuchsia-700', 'dark:bg-fuchsia-900/40', 'dark:text-fuchsia-300', 'scale-110');
+                }, 500);
+            });
+            // Limpiar las selecciones para que el usuario pueda elegir nuevamente
+            board.selected = []; 
+        }
+    }
+}
+        // ---------------------------------------------
+
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            toggleTheme();
+        }
+// ---------------------------------------------
+        // MOTOR DEL JUEGO: BINGO MATEMÁTICO (NUEVO)
+        // ---------------------------------------------
+        const bingoBancoCompleto = [
+            // Resultado: 10
+            { exp: "20% de 50", ans: "10" }, { exp: "√100", ans: "10" }, { exp: "5 × 2", ans: "10" }, { exp: "|-10|", ans: "10" },
+            // Resultado: 50
+            { exp: "25% de 200", ans: "50" }, { exp: "√2500", ans: "50" }, { exp: "100 ÷ 2", ans: "50" }, { exp: "10% de 500", ans: "50" },
+            // Resultado: 100
+            { exp: "10²", ans: "100" }, { exp: "20% de 500", ans: "100" }, { exp: "25 × 4", ans: "100" }, { exp: "√10000", ans: "100" },
+            // Resultado: 200
+            { exp: "10% de 2000", ans: "200" }, { exp: "400 ÷ 2", ans: "200" }, { exp: "50% de 400", ans: "200" },
+            // Descomposición de raíces
+            { exp: "√8", ans: "2√2" }, { exp: "4 ÷ √2", ans: "2√2" },
+            { exp: "√18", ans: "3√2" },
+            { exp: "√32", ans: "4√2" },
+            { exp: "√50", ans: "5√2" },
+            { exp: "√12", ans: "2√3" },
+            { exp: "√27", ans: "3√3" },
+            { exp: "√75", ans: "5√3" },
+            // Resultado: -5
+            { exp: "-15 ÷ 3", ans: "-5" }, { exp: "-2 - 3", ans: "-5" }, { exp: "(-1) × 5", ans: "-5" },
+            // Resultado: -10
+            { exp: "-5 × 2", ans: "-10" }, { exp: "-20 ÷ 2", ans: "-10" }, { exp: "5 - 15", ans: "-10" },
+            // Resultado: -2
+            { exp: "(-8) ÷ 4", ans: "-2" }, { exp: "1 - 3", ans: "-2" }, { exp: "∛-8", ans: "-2" },
+            // Resultado: 1/2 y 0,25
+            { exp: "2⁻¹", ans: "1/2" }, { exp: "50% de 1", ans: "1/2" }, { exp: "3/6 simplificado", ans: "1/2" },
+            { exp: "25% de 1", ans: "0,25" }, { exp: "1/4", ans: "0,25" }, { exp: "5 ÷ 20", ans: "0,25" },
+            // Resultado: 0
+            { exp: "log(1)", ans: "0" }, { exp: "3 × 0", ans: "0" }, { exp: "5 - 5", ans: "0" },
+            // Resultado: 1
+            { exp: "log₁₀(10)", ans: "1" }, { exp: "3/4 + 1/4", ans: "1" }, { exp: "(-1)²", ans: "1" }, { exp: "2⁰", ans: "1" },
+            // Resultado: 2
+            { exp: "∛8", ans: "2" }, { exp: "log₂(4)", ans: "2" }, { exp: "10% de 20", ans: "2" }, { exp: "√4", ans: "2" },
+            // Resultado: 3
+            { exp: "log₂(8)", ans: "3" }, { exp: "√9", ans: "3" }, { exp: "75% de 4", ans: "3" },
+            // Resultado: 4
+            { exp: "(-2)²", ans: "4" }, { exp: "√16", ans: "4" }, { exp: "20% de 20", ans: "4" },
+            // Resultado: 5
+            { exp: "0,5 × 10", ans: "5" }, { exp: "√25", ans: "5" }, { exp: "25% de 20", ans: "5" },
+            // Resultado: 8
+            { exp: "√64", ans: "8" }, { exp: "2³", ans: "8" }, { exp: "50% de 16", ans: "8" },
+            // Resultado: 9
+            { exp: "3²", ans: "9" }, { exp: "√81", ans: "9" }, { exp: "5² - 4²", ans: "9" },
+            // Resultado: 12 y 15
+            { exp: "√144", ans: "12" }, { exp: "10% de 120", ans: "12" },
+            { exp: "10 - (-5)", ans: "15" }, { exp: "50% de 30", ans: "15" },
+            // Resultado: 25
+            { exp: "5²", ans: "25" }, { exp: "√625", ans: "25" }, { exp: "100 ÷ 4", ans: "25" }
+        ];
+
+        let bingoPendientes = [];
+        let bingoActual = null;
+        let aciertosBingo = 0;
+        let vidasBingo = 3;
+
+        function actualizarVidasUI() {
+            const contenedor = document.getElementById('bingo-vidas');
+            if(!contenedor) return;
+            contenedor.innerHTML = '';
+            for(let i = 0; i < 3; i++) {
+                if (i < vidasBingo) {
+                    // Corazón lleno
+                    contenedor.innerHTML += '<i class="fa-solid fa-heart text-rose-500 drop-shadow-md transform hover:scale-110 transition"></i>';
+                } else {
+                    // Corazón vacío (perdido)
+                    contenedor.innerHTML += '<i class="fa-regular fa-heart text-slate-300 dark:text-slate-600"></i>';
+                }
+            }
+        }
+
+        function initMatriz() {
+            const grid = document.getElementById('matriz-grid');
+            if(!grid) return;
+            grid.innerHTML = '';
+            
+            // Reiniciar contadores
+            aciertosBingo = 0;
+            vidasBingo = 3;
+            actualizarVidasUI();
+            
+            // 1. Agrupar expresiones por respuesta para asegurar CUADRÍCULA CON NÚMEROS ÚNICOS
+            const expresionesPorRespuesta = {};
+            bingoBancoCompleto.forEach(item => {
+                if (!expresionesPorRespuesta[item.ans]) {
+                    expresionesPorRespuesta[item.ans] = [];
+                }
+                expresionesPorRespuesta[item.ans].push(item.exp);
+            });
+
+            const respuestasUnicas = Object.keys(expresionesPorRespuesta);
+
+            // 2. Elegir exactamente 12 respuestas ÚNICAS al azar
+            const respuestasSeleccionadas = respuestasUnicas.sort(() => Math.random() - 0.5).slice(0, 12);
+
+            // 3. Para cada respuesta, elegir UNA sola expresión al azar de todas las posibles que dan ese resultado
+            const ejerciciosSeleccionados = respuestasSeleccionadas.map(ans => {
+                const posiblesExps = expresionesPorRespuesta[ans];
+                const expElegida = posiblesExps[Math.floor(Math.random() * posiblesExps.length)];
+                return { ans: ans, exp: expElegida };
+            });
+
+            // 4. Mezclar el orden en que se mostrarán las expresiones al usuario
+            bingoPendientes = [...ejerciciosSeleccionados].sort(() => Math.random() - 0.5);
+
+            // 5. Mezclar las respuestas para ubicarlas en el tablero visual
+            const respuestasGrid = [...respuestasSeleccionadas].sort(() => Math.random() - 0.5);
+            
+            respuestasGrid.forEach((ans, index) => {
+                const btn = document.createElement('button');
+                btn.id = `bingo-cell-${index}`;
+                btn.className = "w-full h-16 md:h-20 bg-white dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-lg md:text-xl font-bold text-slate-800 dark:text-slate-100 hover:border-blue-400 dark:hover:border-blue-500 transition shadow-sm select-none";
+                btn.innerText = ans;
+                btn.onclick = () => verificarBingo(btn, ans);
+                grid.appendChild(btn);
+            });
+
+            mostrarSiguienteExpresionBingo();
+        }
+
+        function mostrarSiguienteExpresionBingo() {
+            const display = document.getElementById('matriz-expression');
+            if (bingoPendientes.length > 0) {
+                bingoActual = bingoPendientes[0];
+                display.innerText = bingoActual.exp;
+                display.classList.remove('scale-95', 'opacity-50');
+            } else {
+                display.innerHTML = '<span class="text-emerald-500">¡BINGO PERFECTO!</span> <i class="fa-solid fa-trophy text-yellow-400 ml-2"></i>';
+                bingoActual = null;
+            }
+        }
+
+        // Lógica del Pasapalabra
+        function saltarExpresion() {
+            if (bingoPendientes.length > 1 && vidasBingo > 0) {
+                const display = document.getElementById('matriz-expression');
+                display.classList.add('scale-95', 'opacity-50');
+                
+                setTimeout(() => {
+                    // Toma la expresión actual y la mueve al final de la cola
+                    const movido = bingoPendientes.shift();
+                    bingoPendientes.push(movido);
+                    mostrarSiguienteExpresionBingo();
+                }, 200);
+            }
+        }
+
+        function verificarBingo(btn, ans) {
+            if (!bingoActual || vidasBingo <= 0) return;
+
+            if (ans === bingoActual.ans) {
+                // ¡Acierto!
+                btn.classList.remove('bg-white', 'dark:bg-slate-700', 'border-slate-200', 'dark:border-slate-600', 'text-slate-800', 'hover:border-blue-400', 'dark:hover:border-blue-500');
+                btn.classList.add('bg-blue-500', 'border-blue-600', 'text-white', 'opacity-60', 'cursor-default', 'scale-95');
+                btn.disabled = true; // Deshabilita el botón para que no se pueda volver a hacer clic
+                
+                bingoPendientes.shift(); // Quitar la expresión resuelta
+                aciertosBingo++;
+                
+                // Sumar XP
+                userStats.xp += 10;
+                updateStatsUI();
+                
+                mostrarSiguienteExpresionBingo();
+                
+                // Verificar victoria
+                if(aciertosBingo === 12 && typeof confetti === 'function') {
+                    confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+                }
+            } else {
+                // Error: Restar Vida
+                vidasBingo--;
+                actualizarVidasUI();
+                
+                // Penalización ligera en estadísticas (opcional)
+                userStats.confidence = Math.max(0, userStats.confidence - 2);
+                updateStatsUI();
+
+                if (vidasBingo <= 0) {
+                    // Game Over
+                    document.getElementById('matriz-expression').innerHTML = '<span class="text-rose-500 text-xl md:text-2xl"><i class="fa-solid fa-skull-crossbones mr-2"></i> ¡Sin Vidas! Intenta de nuevo.</span>';
+                    bingoPendientes = [];
+                    bingoActual = null;
+                    
+                    // Bloquear botones restantes
+                    document.querySelectorAll('[id^="bingo-cell-"]').forEach(b => {
+                        b.disabled = true;
+                        if (!b.classList.contains('bg-blue-500')) {
+                            b.classList.add('opacity-50', 'grayscale');
+                        }
+                    });
+                } else {
+                    // Animación de temblor en el botón equivocado
+                    btn.classList.add('border-rose-500', 'bg-rose-100', 'text-rose-700', '-translate-y-1', 'translate-x-1', 'dark:bg-rose-900/50', 'dark:text-rose-300');
+                    setTimeout(() => {
+                        btn.classList.remove('border-rose-500', 'bg-rose-100', 'text-rose-700', '-translate-y-1', 'translate-x-1', 'dark:bg-rose-900/50', 'dark:text-rose-300');
+                    }, 500);
+                }
+            }
+        }
+ // ---------------------------------------------
+        // MOTOR DEL JUEGO: FIGURAS SEMEJANTES (6 PAREJAS)
+        // ---------------------------------------------
+        
+const bancoFiguras = [
+    // Par 1: Rectángulos (Razón 6 o 1/6)
+    { pairId: 1, ref: 2, svg: `
+        <svg viewBox="-15 -15 130 130" class="w-full h-full">
+            <!-- 1. VÉRTICES / ÁNGULOS RECTOS (Rojo Tailwind) -->
+            <rect x="10" y="30" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+            <rect x="84" y="30" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+            <rect x="10" y="64" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+            <rect x="84" y="64" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+            
+            <!-- 2. FIGURA BASE (Sin relleno y borde Azul Tailwind) -->
+            <rect x="10" y="30" width="80" height="40" fill="none" stroke="#3b82f6" stroke-width="3"/>
+            
+            <!-- 3. TEXTOS Y MEDIDAS (Lados en azul oscuro, ángulos en rojo) -->
+            <text x="50" y="26" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">4</text>
+            <text x="50" y="82" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">4</text>
+            <text x="5" y="55" font-size="14" font-weight="bold" text-anchor="end" fill="#0369a1">2</text>
+            <text x="88" y="55" font-size="14" font-weight="bold" text-anchor="start" fill="#0369a1">2</text>
+        </svg>` 
+    },
+    { pairId: 1, ref: 12, svg: `
+        <svg viewBox="-15 -15 130 130" class="w-full h-full">
+            <rect x="0" y="20" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+            <rect x="94" y="20" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+            <rect x="0" y="74" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+            <rect x="94" y="74" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+            
+            <rect x="0" y="20" width="100" height="60" fill="none" stroke="#3b82f6" stroke-width="3"/>
+            
+            <text x="50" y="15" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">24</text>
+            <text x="50" y="94" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">24</text>
+            <text x="-2" y="55" font-size="14" font-weight="bold" text-anchor="end" fill="#0369a1">12</text>
+            <text x="102" y="55" font-size="14" font-weight="bold" text-anchor="start" fill="#0369a1">12</text>
+        </svg>` 
+    },
+    
+    // Par 2: Triángulos Rectángulos
+    { pairId: 2, ref: 3, svg: `
+        <svg viewBox="-15 -15 130 130" class="w-full h-full">
+            <rect x="20" y="82" width="8" height="8" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+            
+            <polygon points="20,90 85,90 20,15" fill="none" stroke="#3b82f6" stroke-width="3"/>
+            
+            <text x="28" y="32" font-size="12" font-weight="bold" text-anchor="middle" fill="#ef4444">53°</text>
+            <text x="70" y="85" font-size="12" font-weight="bold" text-anchor="start" fill="#ef4444">37°</text>
+            
+            <text x="52" y="105" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">4</text>
+            <text x="15" y="55" font-size="14" font-weight="bold" text-anchor="end" fill="#0369a1">3</text>
+            <text x="55" y="48" font-size="14" font-weight="bold" text-anchor="start" fill="#0369a1">5</text>
+        </svg>` 
+    },
+    { pairId: 2, ref: 9, svg: `
+        <svg viewBox="-15 -15 130 130" class="w-full h-full">
+            <rect x="10" y="92" width="8" height="8" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+            
+            <polygon points="10,100 95,100 10,0" fill="none" stroke="#3b82f6" stroke-width="3"/>
+            
+            <text x="18" y="25" font-size="12" font-weight="bold" text-anchor="middle" fill="#ef4444">53°</text>
+            <text x="75" y="95" font-size="12" font-weight="bold" text-anchor="start" fill="#ef4444">37°</text>
+            
+            <text x="52" y="115" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">12</text>
+            <text x="5" y="55" font-size="14" font-weight="bold" text-anchor="end" fill="#0369a1">9</text>
+            <text x="58" y="50" font-size="14" font-weight="bold" text-anchor="start" fill="#0369a1">15</text>
+        </svg>` 
+    },
+    
+    // Par 3: Cuadrados (Razón 3/5 o 5/3)
+    { pairId: 3, ref: 3, svg: `
+        <svg viewBox="-15 -15 130 130" class="w-full h-full">
+            <rect x="25" y="25" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+            <rect x="69" y="25" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+            <rect x="25" y="69" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+            <rect x="69" y="69" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+            
+            <rect x="25" y="25" width="50" height="50" fill="none" stroke="#3b82f6" stroke-width="3"/>
+            
+            <text x="50" y="20" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">3</text>
+            <text x="50" y="86" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">3</text>
+            <text x="20" y="55" font-size="14" font-weight="bold" text-anchor="end" fill="#0369a1">3</text>
+            <text x="80" y="55" font-size="14" font-weight="bold" text-anchor="start" fill="#0369a1">3</text>
+        </svg>` 
+    },
+    { pairId: 3, ref: 5, svg: `
+        <svg viewBox="-15 -15 130 130" class="w-full h-full">
+            <rect x="10" y="10" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+            <rect x="84" y="10" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+            <rect x="10" y="84" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+            <rect x="84" y="84" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+            
+            <rect x="10" y="10" width="80" height="80" fill="none" stroke="#3b82f6" stroke-width="3"/>
+            
+            <text x="50" y="8" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">5</text>
+            <text x="50" y="100" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">5</text>
+            <text x="5" y="55" font-size="14" font-weight="bold" text-anchor="end" fill="#0369a1">5</text>
+            <text x="95" y="55" font-size="14" font-weight="bold" text-anchor="start" fill="#0369a1">5</text>
+        </svg>` 
+    },
+    
+    // Par 4: Triángulos Equiláteros
+    { pairId: 4, ref: 2, svg: `
+        <svg viewBox="-15 -15 130 130" class="w-full h-full">
+            <polygon points="50,20 85,80 15,80" fill="none" stroke="#3b82f6" stroke-width="3"/>
+            
+            <text x="50" y="35" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">60°</text>
+            <text x="28" y="75" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">60°</text>
+            <text x="72" y="75" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">60°</text>
+            
+            <text x="50" y="95" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">2</text>
+            <text x="32" y="50" font-size="14" font-weight="bold" text-anchor="end" fill="#0369a1">2</text>
+            <text x="68" y="50" font-size="14" font-weight="bold" text-anchor="start" fill="#0369a1">2</text>
+        </svg>` 
+    },
+    { pairId: 4, ref: 8, svg: `
+        <svg viewBox="-15 -15 130 130" class="w-full h-full">
+            <polygon points="50,0 100,90 0,90" fill="none" stroke="#3b82f6" stroke-width="3"/>
+            
+            <text x="50" y="22" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">60°</text>
+            <text x="18" y="85" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">60°</text>
+            <text x="82" y="85" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">60°</text>
+            
+            <text x="50" y="105" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">8</text>
+            <text x="22" y="45" font-size="14" font-weight="bold" text-anchor="end" fill="#0369a1">8</text>
+            <text x="78" y="45" font-size="14" font-weight="bold" text-anchor="start" fill="#0369a1">8</text>
+        </svg>` 
+    },
+
+    // Par 5: Triángulos Isósceles (Razón 10 o 1/10)
+    { pairId: 5, ref: 1, svg: `
+        <svg viewBox="-15 -15 130 130" class="w-full h-full">
+            <polygon points="50,20 85,85 15,85" fill="none" stroke="#3b82f6" stroke-width="3"/>
+            
+            <text x="50" y="35" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">74°</text>
+            <text x="28" y="80" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">53°</text>
+            <text x="72" y="80" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">53°</text>
+            
+            <text x="50" y="98" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">2</text>
+            <text x="32" y="52" font-size="14" font-weight="bold" text-anchor="end" fill="#0369a1">1</text>
+            <text x="68" y="52" font-size="14" font-weight="bold" text-anchor="start" fill="#0369a1">1</text>
+        </svg>` 
+    },
+    { pairId: 5, ref: 10, svg: `
+        <svg viewBox="-15 -15 130 130" class="w-full h-full">
+            <polygon points="50,0 100,95 0,95" fill="none" stroke="#3b82f6" stroke-width="3"/>
+            
+            <text x="50" y="22" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">74°</text>
+            <text x="18" y="90" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">53°</text>
+            <text x="82" y="90" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">53°</text>
+            
+            <text x="50" y="110" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">20</text>
+            <text x="20" y="48" font-size="14" font-weight="bold" text-anchor="end" fill="#0369a1">10</text>
+            <text x="80" y="48" font-size="14" font-weight="bold" text-anchor="start" fill="#0369a1">10</text>
+        </svg>` 
+    },
+
+    // Par 6: Paralelogramos
+    { pairId: 6, ref: 2, svg: `
+        <svg viewBox="-15 -15 130 130" class="w-full h-full">
+            <polygon points="35,25 90,25 65,75 10,75" fill="none" stroke="#3b82f6" stroke-width="3"/>
+            
+            <text x="75" y="38" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">120°</text>
+            <text x="25" y="68" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">120°</text>
+            <text x="42" y="38" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">60°</text>
+            <text x="58" y="68" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">60°</text>
+            
+            <text x="62" y="20" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">4</text>
+            <text x="37" y="90" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">4</text>
+            <text x="20" y="48" font-size="14" font-weight="bold" text-anchor="end" fill="#0369a1">2</text>
+            <text x="80" y="48" font-size="14" font-weight="bold" text-anchor="start" fill="#0369a1">2</text>
+        </svg>` 
+    },
+    { pairId: 6, ref: 6, svg: `
+        <svg viewBox="-15 -15 130 130" class="w-full h-full">
+            <polygon points="30,10 110,10 80,90 0,90" fill="none" stroke="#3b82f6" stroke-width="3"/>
+            
+            <text x="95" y="25" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">120°</text>
+            <text x="15" y="82" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">120°</text>
+            <text x="42" y="25" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">60°</text>
+            <text x="68" y="82" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">60°</text>
+            
+            <text x="70" y="5" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">12</text>
+            <text x="40" y="105" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">12</text>
+            <text x="10" y="48" font-size="14" font-weight="bold" text-anchor="end" fill="#0369a1">6</text>
+            <text x="100" y="48" font-size="14" font-weight="bold" text-anchor="start" fill="#0369a1">6</text>
+        </svg>` 
+    }
+];
+        let semejanzaState = {
+            cartas: [],
+            seleccionadas: [],
+            vidas: 3,
+            paresResueltos: 0
+        };
+
+        function initSemejanza() {
+            semejanzaState.vidas = 3;
+            semejanzaState.seleccionadas = [];
+            semejanzaState.paresResueltos = 0;
+            renderVidasSemejanza();
+            document.getElementById('modal-razon').classList.add('hidden');
+            
+            // Mezclar cartas
+            semejanzaState.cartas = [...bancoFiguras].sort(() => Math.random() - 0.5);
+            
+            const grid = document.getElementById('semejanza-grid');
+            grid.innerHTML = '';
+            
+            semejanzaState.cartas.forEach((carta, index) => {
+                const cardEl = document.createElement('div');
+                cardEl.id = `carta-sem-${index}`;
+                cardEl.className = "w-full aspect-square bg-white dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl cursor-pointer hover:border-emerald-400 transition-all shadow-sm flex items-center justify-center p-2 text-slate-800 dark:text-slate-100 relative";
+                cardEl.innerHTML = `
+                    ${carta.svg}
+                `;
+                cardEl.onclick = () => selectCartaSemejanza(index);
+                grid.appendChild(cardEl);
+            });
+        }
+
+        function renderVidasSemejanza() {
+            const container = document.getElementById('semejanza-vidas-container');
+            container.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                container.innerHTML += i < semejanzaState.vidas 
+                    ? '<i class="fa-solid fa-heart text-rose-500 animate-pulse"></i>'
+                    : '<i class="fa-solid fa-heart-crack text-slate-300 dark:text-slate-600"></i>';
+            }
+        }
+
+        function selectCartaSemejanza(index) {
+            const cardData = semejanzaState.cartas[index];
+            const cardEl = document.getElementById(`carta-sem-${index}`);
+            
+            // Evitar clics en resueltos o doble clic
+            if(cardData.resuelta || semejanzaState.seleccionadas.some(s => s.index === index)) return;
+            
+            if(semejanzaState.seleccionadas.length < 2) {
+                cardEl.classList.add('border-emerald-500', 'bg-emerald-50', 'dark:bg-emerald-900/30');
+                semejanzaState.seleccionadas.push({ index, ...cardData });
+                
+                if(semejanzaState.seleccionadas.length === 2) {
+                    setTimeout(verificarParejaSemejanza, 400);
+                }
+            }
+        }
+
+        function verificarParejaSemejanza() {
+            const [fig1, fig2] = semejanzaState.seleccionadas;
+            
+            if (fig1.pairId === fig2.pairId) {
+                // Son Semejantes -> Abrir Modal para la Razón
+                document.getElementById('figura-preview-1').innerHTML = fig1.svg;
+                document.getElementById('figura-preview-2').innerHTML = fig2.svg;
+                document.getElementById('input-razon').value = "";
+                document.getElementById('error-razon').classList.add('hidden');
+                document.getElementById('modal-razon').classList.remove('hidden');
+            } else {
+                // Incorrecto -> Quitar vida
+                falloSemejanza();
+            }
+        }
+
+        function parseFraccion(str) {
+            str = str.replace(',', '.').trim();
+            if(str.includes('/')) {
+                const partes = str.split('/');
+                return parseFloat(partes[0]) / parseFloat(partes[1]);
+            }
+            return parseFloat(str);
+        }
+
+        function verificarRazon() {
+            const inputVal = document.getElementById('input-razon').value;
+            const [fig1, fig2] = semejanzaState.seleccionadas;
+            
+            // Calculo estricto del orden: fig2 / fig1
+            const razonCorrecta = fig2.ref / fig1.ref;
+            const razonUsuario = parseFraccion(inputVal);
+
+            // Tolerancia flotante para precisión (ej: 0.333333 vs 1/3)
+            if (!isNaN(razonUsuario) && Math.abs(razonUsuario - razonCorrecta) < 0.01) {
+                // Razón Correcta!
+                document.getElementById('modal-razon').classList.add('hidden');
+                
+                semejanzaState.seleccionadas.forEach(item => {
+                    const el = document.getElementById(`carta-sem-${item.index}`);
+                    semejanzaState.cartas[item.index].resuelta = true;
+                    el.classList.remove('border-emerald-500', 'bg-emerald-50');
+                    el.classList.add('border-emerald-600', 'bg-emerald-100', 'opacity-50', 'pointer-events-none', 'dark:bg-emerald-900', 'dark:border-emerald-700');
+                    el.innerHTML = '<i class="fa-solid fa-check-double text-3xl text-emerald-500"></i>';
+                });
+                
+                semejanzaState.seleccionadas = [];
+                semejanzaState.paresResueltos++;
+                userStats.xp += 20;
+                updateStatsUI();
+                
+                if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
+                
+               if (semejanzaState.paresResueltos === 6) {
+                    setTimeout(() => alert("¡Felicidades! Has completado el tablero de semejanza de figuras."), 500);
+                }
+            } else {
+                // Razón Incorrecta -> Pierde vida pero sigue en el modal
+                semejanzaState.vidas--;
+                renderVidasSemejanza();
+                document.getElementById('error-razon').classList.remove('hidden');
+                document.getElementById('input-razon').classList.add('border-rose-500', 'animate-pulse');
+                setTimeout(() => document.getElementById('input-razon').classList.remove('animate-pulse'), 500);
+                
+                checkGameOverSemejanza();
+            }
+        }
+
+        function falloSemejanza() {
+            semejanzaState.vidas--;
+            renderVidasSemejanza();
+            
+            semejanzaState.seleccionadas.forEach(item => {
+                const el = document.getElementById(`carta-sem-${item.index}`);
+                el.classList.remove('border-emerald-500', 'bg-emerald-50');
+                el.classList.add('border-rose-500', 'bg-rose-50', 'dark:bg-rose-900/30', 'translate-x-1');
+                
+                setTimeout(() => {
+                    el.classList.remove('border-rose-500', 'bg-rose-50', 'dark:bg-rose-900/30', 'translate-x-1');
+                }, 600);
+            });
+            semejanzaState.seleccionadas = [];
+            checkGameOverSemejanza();
+        }
+
+        function checkGameOverSemejanza() {
+            if (semejanzaState.vidas <= 0) {
+                document.getElementById('modal-razon').classList.add('hidden');
+                setTimeout(() => {
+                    alert("¡Te has quedado sin vidas! El tablero se reiniciará para que lo intentes de nuevo.");
+                    initSemejanza();
+                }, 300);
+            }
+        }  
+        
+// --- SECTION 7: LÓGICA DEL GRÁFICO A LA EXPRESIÓN ---
+let targetH = 0;
+let targetK = 0;
+let targetA = 1; // 1 si abre hacia arriba, -1 si abre hacia abajo
+
+function initGraficoExpresion() {
+    // Generar traslaciones aleatorias entre -8 y 8
+    targetH = Math.floor(Math.random() * 17) - 8;
+    targetK = Math.floor(Math.random() * 17) - 8;
+    
+    // Decidir aleatoriamente la concavidad (50% de probabilidad para cada una)
+    targetA = Math.random() < 0.5 ? 1 : -1; 
+    
+    document.getElementById('input-expresion').value = '';
+    const msgDiv = document.getElementById('mensaje-grafico');
+    msgDiv.classList.add('hidden');
+    msgDiv.className = 'hidden p-4 rounded-xl font-medium text-sm flex items-center gap-2'; // Reset
+    
+    const canvas = document.getElementById('canvas-grafico');
+    if(canvas) {
+        const ctx = canvas.getContext('2d');
+        dibujarEscenario(ctx);
+    }
+}
+
+function dibujarEscenario(ctx) {
+    ctx.clearRect(0, 0, 400, 400);
+    const isDark = document.documentElement.classList.contains('dark');
+    
+    // Cuadrícula (-10 a 10) -> Cada unidad son 20 pixeles
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = isDark ? '#334155' : '#e2e8f0';
+    for(let i = -10; i <= 10; i++) {
+        ctx.beginPath(); ctx.moveTo(0, 200 - i*20); ctx.lineTo(400, 200 - i*20); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(200 + i*20, 0); ctx.lineTo(200 + i*20, 400); ctx.stroke();
+    }
+    
+    // Ejes X e Y con puntas de flecha
+    ctx.strokeStyle = isDark ? '#94a3b8' : '#64748b';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); 
+    
+    // Línea Eje X
+    ctx.moveTo(0, 200); ctx.lineTo(400, 200); 
+    // Flechas Eje X (Derecha e Izquierda)
+    ctx.moveTo(400, 200); ctx.lineTo(390, 195);
+    ctx.moveTo(400, 200); ctx.lineTo(390, 205);
+    ctx.moveTo(0, 200); ctx.lineTo(10, 195);
+    ctx.moveTo(0, 200); ctx.lineTo(10, 205);
+
+    // Línea Eje Y
+    ctx.moveTo(200, 0); ctx.lineTo(200, 400); 
+    // Flechas Eje Y (Arriba y Abajo)
+    ctx.moveTo(200, 0); ctx.lineTo(195, 10);
+    ctx.moveTo(200, 0); ctx.lineTo(205, 10);
+    ctx.moveTo(200, 400); ctx.lineTo(195, 390);
+    ctx.moveTo(200, 400); ctx.lineTo(205, 390);
+    
+    ctx.stroke();
+
+    // NÚMEROS EN LOS EJES (Graduación de 2 en 2)
+    ctx.fillStyle = isDark ? '#cbd5e1' : '#475569';
+    ctx.font = 'bold 10px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    for(let i = -10; i <= 10; i += 2) {
+        if(i === 0) continue; 
+        
+        // Números en el Eje X (desplazados un poco hacia abajo)
+        ctx.fillText(i, 200 + i*20, 214);
+        
+        // Números en el Eje Y (desplazados un poco a la izquierda)
+        ctx.fillText(i, 186, 200 - i*20);
+    }
+    
+    // Dibujar Parábola Objetivo (Azul Punteada)
+    ctx.beginPath();
+    ctx.strokeStyle = '#3b82f6'; // blue-500
+    ctx.lineWidth = 3;
+    ctx.setLineDash([5, 5]);
+    for(let px = 0; px <= 400; px++) {
+        let x = (px - 200) / 20;
+        let y = targetA * Math.pow(x - targetH, 2) + targetK; 
+        
+        let py = 200 - y * 20;
+        if(px === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+}
+
+function graficarUsuario() {
+    const expr = document.getElementById('input-expresion').value;
+    
+    if(!expr.trim()) {
+        mostrarMensajeGrafico("Ingresa una expresión en el recuadro primero.", "error");
+        return;
+    }
+
+    // Parseo básico para evitar errores y convertir notación matemática a JS
+    const safeExpr = expr.toLowerCase().replace(/\^/g, '**');
+    let userFunc;
+    try {
+        userFunc = new Function('x', 'return ' + safeExpr);
+        userFunc(0); // Test de evaluación rápida para verificar sintaxis
+    } catch(e) {
+        mostrarMensajeGrafico("Expresión inválida. Revisa la sintaxis, por ejemplo: -(x-3)^2 - 4", "error");
+        return;
+    }
+
+    const canvas = document.getElementById('canvas-grafico');
+    const ctx = canvas.getContext('2d');
+    
+    // Redibujar plano y parábola objetivo para limpiar gráfica roja anterior
+    dibujarEscenario(ctx);
+
+    // Dibujar Parábola del Usuario (Roja sólida)
+    ctx.beginPath();
+    ctx.strokeStyle = '#f43f5e'; // rose-500
+    ctx.lineWidth = 3;
+    for(let px = 0; px <= 400; px++) {
+        let x = (px - 200) / 20;
+        let y;
+        try { 
+            y = userFunc(x); 
+        } catch(e) { continue; }
+        
+        let py = 200 - y * 20;
+        if(px === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+
+    verificarCoincidenciaGrafica(userFunc);
+}
+
+function verificarCoincidenciaGrafica(userFunc) {
+    let coincide = true;
+    
+    // Evaluar en varios puntos del dominio usando targetA
+    for(let x = -10; x <= 10; x++) {
+        let targetY = targetA * Math.pow(x - targetH, 2) + targetK;
+        let userY;
+        try { 
+            userY = userFunc(x); 
+        } catch(e) { 
+            coincide = false; 
+            break; 
+        }
+        
+        // Tolerancia a pequeños errores de coma flotante
+        if(Math.abs(targetY - userY) > 0.1) {
+            coincide = false;
+            break;
+        }
+    }
+
+    if(coincide) {
+        mostrarMensajeGrafico("¡Exacto! Ambas parábolas coinciden a la perfección.", "exito");
+        if (typeof confetti === 'function') confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+    } else {
+        mostrarMensajeGrafico("Las gráficas aún no coinciden. Revisa el desplazamiento, signos y concavidad.", "error");
+    }
+}
+
+function mostrarMensajeGrafico(texto, tipo) {
+    const msgDiv = document.getElementById('mensaje-grafico');
+    msgDiv.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-700', 'border-emerald-300', 'bg-rose-100', 'text-rose-700', 'border-rose-300');
+    
+    if(tipo === 'exito') {
+        msgDiv.classList.add('bg-emerald-100', 'text-emerald-700', 'border', 'border-emerald-300');
+        msgDiv.innerHTML = `<i class="fa-solid fa-check-circle text-lg"></i> <span>${texto}</span>`;
+    } else {
+        msgDiv.classList.add('bg-rose-100', 'text-rose-700', 'border', 'border-rose-300');
+        msgDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-lg"></i> <span>${texto}</span>`;
+    }
+}
+    </script>
+</body>
+</html>
