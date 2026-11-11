@@ -171,6 +171,12 @@
     <i class="fa-solid fa-chart-line text-lg text-rose-500 w-5"></i>
     <span>Del gráfico a la expresión</span>
 </button>
+            <!-- Nuevo botón: Expresión a Gráfico -->
+                <button onclick="showSection('expresion-grafico'); initExpresionGrafico();" id="nav-expresion-grafico" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                    <i class="fa-solid fa-draw-polygon text-lg text-orange-500 w-5"></i>
+                    <span>De la expresión al gráfico</span>
+                </button>
+
                 <button onclick="showSection('calm')" id="nav-calm" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
                     <i class="fa-solid fa-spa text-lg text-emerald-500 w-5"></i>
                     <span>Pausa & Calma</span>
@@ -200,13 +206,13 @@
                     <div class="relative z-10 max-w-2xl">
                         <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur px-3 py-1 rounded-full text-xs font-medium mb-3">
                             <i class="fa-solid fa-star text-amber-300"></i>
-                            <span>Espacio de Aprendizaje Seguro - Sin Tiempo Limite</span>
+                            <span>Espacio de Aprendizaje</span>
                         </div>
                         <h2 class="text-2xl lg:text-3xl font-extrabold tracking-tight mb-2">
                             ¡Hola, Estudiante! 👋
                         </h2>
                         <p class="text-brand-100 text-sm lg:text-base mb-6 leading-relaxed">
-                            Aquí el SIMCE no se mide en velocidad, sino en el **valor de tus estrategias**. Entrena paso a paso, reflexiona sobre tus avances y fortalece tu autoconfianza.
+                            En esta plataforma encontrarás diversos recursos intercativos destinados a ejercitar contenidos matemáticos. Entrena paso a paso, no temas a equivocarte, reflexiona sobre tus avances y fortalece tu autoconfianza.
                         </p>
                         <div class="flex flex-wrap gap-3">
                             <button onclick="showSection('seleccionar_mision')" class="bg-white text-brand-700 hover:bg-slate-100 px-5 py-2.5 rounded-xl font-bold text-sm shadow-md transition-all transform active:scale-95 flex items-center gap-2">
@@ -619,7 +625,49 @@
         </div>
     </div>
 </section>
-            
+            <!-- SECTION 8: DE LA EXPRESIÓN AL GRÁFICO -->
+            <section id="section-expresion-grafico" class="hidden space-y-6">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-slate-900 dark:text-white text-lg flex items-center gap-2">
+                            <i class="fa-solid fa-draw-polygon text-orange-500"></i> De la Expresión al Gráfico
+                        </h3>
+                        <span class="bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                            Función Cuadrática
+                        </span>
+                    </div>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">
+                        Observa la expresión matemática. Arrastra el vértice de la parábola para ubicarla en el plano cartesiano y haz clic sobre sus brazos para invertir su concavidad. Cuando creas que la gráfica representa la expresión, haz clic en "Comprobar Gráfica".
+                    </p>
+                    <div class="flex flex-col lg:flex-row gap-8 items-start justify-center">
+                        <!-- Controles e Expresión -->
+                        <div class="w-full lg:w-1/2 space-y-6 flex flex-col justify-center">
+                            <div class="bg-slate-50 dark:bg-slate-900 p-6 rounded-xl border-2 border-slate-200 dark:border-slate-700 shadow-inner text-center">
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-4 uppercase tracking-wider">
+                                    Representa esta expresión:
+                                </label>
+                                <div class="text-3xl font-bold text-orange-600 dark:text-orange-400 font-mono" id="target-expression">
+                                    Cargando...
+                                </div>
+                            </div>
+                            <div id="mensaje-expresion-grafico" class="hidden p-4 rounded-xl font-medium text-sm flex items-center gap-2"></div>
+                            <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-100 dark:border-slate-700/60">
+                                <button onclick="comprobarGrafica()" class="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 rounded-xl transition shadow-md flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-check-double"></i> Comprobar Gráfica
+                                </button>
+                                <button onclick="initExpresionGrafico()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-bold py-3 px-6 rounded-xl transition flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-forward-step"></i> Nueva Función
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Contenedor del Plano Cartesiano -->
+                        <div class="bg-white dark:bg-slate-900 p-2 rounded-xl border-2 border-slate-200 dark:border-slate-700 shadow-inner w-full max-w-[420px] mx-auto flex justify-center relative select-none">
+                            <canvas id="canvas-expresion" width="400" height="400" class="max-w-full h-auto bg-slate-50 dark:bg-slate-800 rounded-lg cursor-grab active:cursor-grabbing"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- SECTION 3: PAUSA Y CALMA -->
             <section id="section-calm" class="hidden h-full flex flex-col justify-center items-center py-12">
                 <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">Momento de Calma</h2>
@@ -697,7 +745,11 @@
             const sueldo_base_a = elegirAlAzar([200000, 220000, 250000]);
             const sueldo_base_b = sueldo_base_a + (comision_a - comision_b) * telefonos_meta;
 
-            const texto = `Un vendedor tiene dos ofertas. La compañía A ofrece un sueldo de $${sueldo_base_a} más $${comision_a} por cada teléfono vendido. La compañía B ofrece $${sueldo_base_b} más $${comision_b} por teléfono vendido. ¿Cuántos teléfonos debe vender para ganar lo mismo en ambas?`;
+            const texto = `Un vendedor tiene dos ofertas. La compañía A ofrece un sueldo de
+sueldobaseamás
+{comision_a} por cada teléfono vendido. La compañía B ofrece
+sueldobasebmás
+{comision_b} por teléfono vendido. ¿Cuántos teléfonos debe vender para ganar lo mismo en ambas?`;
 
             const correcta = telefonos_meta;
             let alternativasRaw = [
@@ -1391,11 +1443,8 @@
         let selectedExecOption = null;
 
         // 4. UI FUNCTIONS
-        function showSection(sectionId) {
-            // Agregamos 'section-matriz' a la lista
-           // Reemplaza la línea del forEach existente por esta:
-          ['section-dashboard', 'section-seleccionar_mision', 'section-missions', 'section-calm', 'section-kahooma', 'section-matriz', 'section-semejanza', 'section-grafico-expresion'].forEach(id => {
-          // ... el resto de la función queda igual
+          function showSection(sectionId) {
+          ['section-dashboard', 'section-seleccionar_mision', 'section-missions', 'section-calm', 'section-kahooma', 'section-matriz', 'section-semejanza', 'section-grafico-expresion', 'section-expresion-grafico'].forEach(id => {
                 const el = document.getElementById(id);
                 if(el) {
                     el.classList.add('hidden');
@@ -1511,7 +1560,7 @@
             const q = activeQuestions[currentQuestionIndex];
             
             // Update UI Counters
-            document.getElementById('mission-progress-text').innerText = `${currentQuestionIndex + 1}/${activeQuestions.length}`;
+            document.getElementById('mission-progress-text').innerText = `currentQuestionIndex+1/{activeQuestions.length}`;
             document.getElementById('problem-text').innerText = q.texto;
             
             // Badge Dificultad
@@ -1558,7 +1607,7 @@
                 const div = document.createElement('div');
                 div.className = "p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer hover:border-brand-400 transition flex gap-3 items-center exec-opt";
                 div.onclick = () => selectExecOption(div, opt.correcta);
-div.innerHTML = `<div class="w-6 h-6 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 font-bold flex items-center justify-center text-xs indicator-letra">${opt.letra}</div><p class="text-sm font-medium text-slate-700 dark:text-slate-200 break-words w-full overflow-hidden">${opt.texto}</p>`;                execContainer.appendChild(div);
+div.innerHTML = `<div class="w-6 h-6 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 font-bold flex items-center justify-center text-xs indicator-letra">opt.letra</div><pclass="text-smfont-mediumtext-slate-700dark:text-slate-200break-wordsw-fulloverflow-hidden">{opt.texto}</p>`;                execContainer.appendChild(div);
             });
         }
 
@@ -1748,7 +1797,7 @@ function initKahooma() {
 
             options.forEach((val, idx) => {
                 const node = document.createElement('div');
-                node.id = `k-node-${boardId}-${idx}`;
+                node.id = `k-node-boardId-{idx}`;
                 node.className = `absolute ${positions[idx]} w-12 h-12 bg-white dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 text-slate-800 dark:text-slate-100 rounded-full flex items-center justify-center font-bold shadow-md cursor-pointer transition-all duration-300 hover:scale-110 hover:border-fuchsia-400 select-none`;
                 node.innerText = val;
                 node.onclick = () => selectKahoomaNode(boardId, idx, val);
@@ -1762,7 +1811,7 @@ function selectKahoomaNode(boardId, nodeIdx, val) {
     const board = kahoomaState[boardId];
     if (board.solved) return;
 
-    const nodeEl = document.getElementById(`k-node-${boardId}-${nodeIdx}`);
+    const nodeEl = document.getElementById(`k-node-boardId-{nodeIdx}`);
     const centerEl = document.getElementById(`kahooma-center-${boardId}`);
 
     // 1. LÓGICA DE DESELECCIÓN: Verificar si ya estaba seleccionado
@@ -1794,7 +1843,7 @@ function selectKahoomaNode(boardId, nodeIdx, val) {
             centerEl.innerHTML = '<i class="fa-solid fa-check text-2xl"></i>';
             
             board.selected.forEach(item => {
-                const el = document.getElementById(`k-node-${boardId}-${item.idx}`);
+                const el = document.getElementById(`k-node-boardId-{item.idx}`);
                 el.classList.remove('border-fuchsia-500', 'bg-fuchsia-100', 'text-fuchsia-700');
                 el.classList.add('border-emerald-500', 'bg-emerald-100', 'text-emerald-700', 'dark:bg-emerald-900/40', 'dark:text-emerald-300');
             });
@@ -1806,7 +1855,7 @@ function selectKahoomaNode(boardId, nodeIdx, val) {
         } else {
             // Respuesta Incorrecta: animar temblor y reiniciar
             board.selected.forEach(item => {
-                const el = document.getElementById(`k-node-${boardId}-${item.idx}`);
+                const el = document.getElementById(`k-node-boardId-{item.idx}`);
                 el.classList.remove('border-fuchsia-500', 'bg-fuchsia-100');
                 el.classList.add('border-rose-500', 'bg-rose-100', 'text-rose-700', '-translate-y-1', 'translate-x-1');
                 
@@ -2033,185 +2082,185 @@ const bancoFiguras = [
     // Par 1: Rectángulos (Razón 6 o 1/6)
     { pairId: 1, ref: 2, svg: `
         <svg viewBox="-15 -15 130 130" class="w-full h-full">
-            <!-- 1. VÉRTICES / ÁNGULOS RECTOS (Rojo Tailwind) -->
-            <rect x="10" y="30" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
-            <rect x="84" y="30" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
-            <rect x="10" y="64" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
-            <rect x="84" y="64" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+            <!-- 1. VÉRTICES / ÁNGULOS RECTOS (Naranja) -->
+            <rect x="10" y="30" width="6" height="6" fill="none" stroke="#f97316" stroke-width="1.5"/>
+            <rect x="84" y="30" width="6" height="6" fill="none" stroke="#f97316" stroke-width="1.5"/>
+            <rect x="10" y="64" width="6" height="6" fill="none" stroke="#f97316" stroke-width="1.5"/>
+            <rect x="84" y="64" width="6" height="6" fill="none" stroke="#f97316" stroke-width="1.5"/>
             
-            <!-- 2. FIGURA BASE (Sin relleno y borde Azul Tailwind) -->
-            <rect x="10" y="30" width="80" height="40" fill="none" stroke="#3b82f6" stroke-width="3"/>
+            <!-- 2. FIGURA BASE (Sin relleno y borde Verde) -->
+            <rect x="10" y="30" width="80" height="40" fill="none" stroke="#22c55e" stroke-width="3"/>
             
-            <!-- 3. TEXTOS Y MEDIDAS (Lados en azul oscuro, ángulos en rojo) -->
-            <text x="50" y="26" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">4</text>
-            <text x="50" y="82" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">4</text>
-            <text x="5" y="55" font-size="14" font-weight="bold" text-anchor="end" fill="#0369a1">2</text>
-            <text x="88" y="55" font-size="14" font-weight="bold" text-anchor="start" fill="#0369a1">2</text>
+            <!-- 3. TEXTOS Y MEDIDAS (Lados en verde, ángulos en naranja) -->
+            <text x="50" y="26" font-size="14" font-weight="bold" text-anchor="middle" fill="#16a34a">4</text>
+            <text x="50" y="82" font-size="14" font-weight="bold" text-anchor="middle" fill="#16a34a">4</text>
+            <text x="5" y="55" font-size="14" font-weight="bold" text-anchor="end" fill="#16a34a">2</text>
+            <text x="88" y="55" font-size="14" font-weight="bold" text-anchor="start" fill="#16a34a">2</text>
         </svg>` 
     },
     { pairId: 1, ref: 12, svg: `
         <svg viewBox="-15 -15 130 130" class="w-full h-full">
-            <rect x="0" y="20" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
-            <rect x="94" y="20" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
-            <rect x="0" y="74" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
-            <rect x="94" y="74" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+            <rect x="0" y="20" width="6" height="6" fill="none" stroke="#f97316" stroke-width="1.5"/>
+            <rect x="94" y="20" width="6" height="6" fill="none" stroke="#f97316" stroke-width="1.5"/>
+            <rect x="0" y="74" width="6" height="6" fill="none" stroke="#f97316" stroke-width="1.5"/>
+            <rect x="94" y="74" width="6" height="6" fill="none" stroke="#f97316" stroke-width="1.5"/>
             
-            <rect x="0" y="20" width="100" height="60" fill="none" stroke="#3b82f6" stroke-width="3"/>
+            <rect x="0" y="20" width="100" height="60" fill="none" stroke="#22c55e" stroke-width="3"/>
             
-            <text x="50" y="15" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">24</text>
-            <text x="50" y="94" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">24</text>
-            <text x="-2" y="55" font-size="14" font-weight="bold" text-anchor="end" fill="#0369a1">12</text>
-            <text x="102" y="55" font-size="14" font-weight="bold" text-anchor="start" fill="#0369a1">12</text>
+            <text x="50" y="15" font-size="14" font-weight="bold" text-anchor="middle" fill="#16a34a">24</text>
+            <text x="50" y="94" font-size="14" font-weight="bold" text-anchor="middle" fill="#16a34a">24</text>
+            <text x="-2" y="55" font-size="14" font-weight="bold" text-anchor="end" fill="#16a34a">12</text>
+            <text x="102" y="55" font-size="14" font-weight="bold" text-anchor="start" fill="#16a34a">12</text>
         </svg>` 
     },
     
     // Par 2: Triángulos Rectángulos
     { pairId: 2, ref: 3, svg: `
         <svg viewBox="-15 -15 130 130" class="w-full h-full">
-            <rect x="20" y="82" width="8" height="8" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+            <rect x="20" y="82" width="8" height="8" fill="none" stroke="#f97316" stroke-width="1.5"/>
             
-            <polygon points="20,90 85,90 20,15" fill="none" stroke="#3b82f6" stroke-width="3"/>
+            <polygon points="20,90 85,90 20,15" fill="none" stroke="#22c55e" stroke-width="3"/>
             
-            <text x="28" y="32" font-size="12" font-weight="bold" text-anchor="middle" fill="#ef4444">53°</text>
-            <text x="70" y="85" font-size="12" font-weight="bold" text-anchor="start" fill="#ef4444">37°</text>
+            <text x="28" y="32" font-size="12" font-weight="bold" text-anchor="middle" fill="#f97316">53°</text>
+            <text x="70" y="85" font-size="12" font-weight="bold" text-anchor="start" fill="#f97316">37°</text>
             
-            <text x="52" y="105" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">4</text>
-            <text x="15" y="55" font-size="14" font-weight="bold" text-anchor="end" fill="#0369a1">3</text>
-            <text x="55" y="48" font-size="14" font-weight="bold" text-anchor="start" fill="#0369a1">5</text>
+            <text x="52" y="105" font-size="14" font-weight="bold" text-anchor="middle" fill="#16a34a">4</text>
+            <text x="15" y="55" font-size="14" font-weight="bold" text-anchor="end" fill="#16a34a">3</text>
+            <text x="55" y="48" font-size="14" font-weight="bold" text-anchor="start" fill="#16a34a">5</text>
         </svg>` 
     },
     { pairId: 2, ref: 9, svg: `
         <svg viewBox="-15 -15 130 130" class="w-full h-full">
-            <rect x="10" y="92" width="8" height="8" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+            <rect x="10" y="92" width="8" height="8" fill="none" stroke="#f97316" stroke-width="1.5"/>
             
-            <polygon points="10,100 95,100 10,0" fill="none" stroke="#3b82f6" stroke-width="3"/>
+            <polygon points="10,100 95,100 10,0" fill="none" stroke="#22c55e" stroke-width="3"/>
             
-            <text x="18" y="25" font-size="12" font-weight="bold" text-anchor="middle" fill="#ef4444">53°</text>
-            <text x="75" y="95" font-size="12" font-weight="bold" text-anchor="start" fill="#ef4444">37°</text>
+            <text x="18" y="25" font-size="12" font-weight="bold" text-anchor="middle" fill="#f97316">53°</text>
+            <text x="75" y="95" font-size="12" font-weight="bold" text-anchor="start" fill="#f97316">37°</text>
             
-            <text x="52" y="115" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">12</text>
-            <text x="5" y="55" font-size="14" font-weight="bold" text-anchor="end" fill="#0369a1">9</text>
-            <text x="58" y="50" font-size="14" font-weight="bold" text-anchor="start" fill="#0369a1">15</text>
+            <text x="52" y="115" font-size="14" font-weight="bold" text-anchor="middle" fill="#16a34a">12</text>
+            <text x="5" y="55" font-size="14" font-weight="bold" text-anchor="end" fill="#16a34a">9</text>
+            <text x="58" y="50" font-size="14" font-weight="bold" text-anchor="start" fill="#16a34a">15</text>
         </svg>` 
     },
     
     // Par 3: Cuadrados (Razón 3/5 o 5/3)
     { pairId: 3, ref: 3, svg: `
         <svg viewBox="-15 -15 130 130" class="w-full h-full">
-            <rect x="25" y="25" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
-            <rect x="69" y="25" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
-            <rect x="25" y="69" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
-            <rect x="69" y="69" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+            <rect x="25" y="25" width="6" height="6" fill="none" stroke="#f97316" stroke-width="1.5"/>
+            <rect x="69" y="25" width="6" height="6" fill="none" stroke="#f97316" stroke-width="1.5"/>
+            <rect x="25" y="69" width="6" height="6" fill="none" stroke="#f97316" stroke-width="1.5"/>
+            <rect x="69" y="69" width="6" height="6" fill="none" stroke="#f97316" stroke-width="1.5"/>
             
-            <rect x="25" y="25" width="50" height="50" fill="none" stroke="#3b82f6" stroke-width="3"/>
+            <rect x="25" y="25" width="50" height="50" fill="none" stroke="#22c55e" stroke-width="3"/>
             
-            <text x="50" y="20" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">3</text>
-            <text x="50" y="86" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">3</text>
-            <text x="20" y="55" font-size="14" font-weight="bold" text-anchor="end" fill="#0369a1">3</text>
-            <text x="80" y="55" font-size="14" font-weight="bold" text-anchor="start" fill="#0369a1">3</text>
+            <text x="50" y="20" font-size="14" font-weight="bold" text-anchor="middle" fill="#16a34a">3</text>
+            <text x="50" y="86" font-size="14" font-weight="bold" text-anchor="middle" fill="#16a34a">3</text>
+            <text x="20" y="55" font-size="14" font-weight="bold" text-anchor="end" fill="#16a34a">3</text>
+            <text x="80" y="55" font-size="14" font-weight="bold" text-anchor="start" fill="#16a34a">3</text>
         </svg>` 
     },
     { pairId: 3, ref: 5, svg: `
         <svg viewBox="-15 -15 130 130" class="w-full h-full">
-            <rect x="10" y="10" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
-            <rect x="84" y="10" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
-            <rect x="10" y="84" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
-            <rect x="84" y="84" width="6" height="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+            <rect x="10" y="10" width="6" height="6" fill="none" stroke="#f97316" stroke-width="1.5"/>
+            <rect x="84" y="10" width="6" height="6" fill="none" stroke="#f97316" stroke-width="1.5"/>
+            <rect x="10" y="84" width="6" height="6" fill="none" stroke="#f97316" stroke-width="1.5"/>
+            <rect x="84" y="84" width="6" height="6" fill="none" stroke="#f97316" stroke-width="1.5"/>
             
-            <rect x="10" y="10" width="80" height="80" fill="none" stroke="#3b82f6" stroke-width="3"/>
+            <rect x="10" y="10" width="80" height="80" fill="none" stroke="#22c55e" stroke-width="3"/>
             
-            <text x="50" y="8" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">5</text>
-            <text x="50" y="100" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">5</text>
-            <text x="5" y="55" font-size="14" font-weight="bold" text-anchor="end" fill="#0369a1">5</text>
-            <text x="95" y="55" font-size="14" font-weight="bold" text-anchor="start" fill="#0369a1">5</text>
+            <text x="50" y="8" font-size="14" font-weight="bold" text-anchor="middle" fill="#16a34a">5</text>
+            <text x="50" y="100" font-size="14" font-weight="bold" text-anchor="middle" fill="#16a34a">5</text>
+            <text x="5" y="55" font-size="14" font-weight="bold" text-anchor="end" fill="#16a34a">5</text>
+            <text x="95" y="55" font-size="14" font-weight="bold" text-anchor="start" fill="#16a34a">5</text>
         </svg>` 
     },
     
     // Par 4: Triángulos Equiláteros
     { pairId: 4, ref: 2, svg: `
         <svg viewBox="-15 -15 130 130" class="w-full h-full">
-            <polygon points="50,20 85,80 15,80" fill="none" stroke="#3b82f6" stroke-width="3"/>
+            <polygon points="50,20 85,80 15,80" fill="none" stroke="#22c55e" stroke-width="3"/>
             
-            <text x="50" y="35" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">60°</text>
-            <text x="28" y="75" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">60°</text>
-            <text x="72" y="75" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">60°</text>
+            <text x="50" y="35" font-size="12" font-weight="bold" fill="#f97316" text-anchor="middle">60°</text>
+            <text x="28" y="75" font-size="12" font-weight="bold" fill="#f97316" text-anchor="middle">60°</text>
+            <text x="72" y="75" font-size="12" font-weight="bold" fill="#f97316" text-anchor="middle">60°</text>
             
-            <text x="50" y="95" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">2</text>
-            <text x="32" y="50" font-size="14" font-weight="bold" text-anchor="end" fill="#0369a1">2</text>
-            <text x="68" y="50" font-size="14" font-weight="bold" text-anchor="start" fill="#0369a1">2</text>
+            <text x="50" y="95" font-size="14" font-weight="bold" text-anchor="middle" fill="#16a34a">2</text>
+            <text x="32" y="50" font-size="14" font-weight="bold" text-anchor="end" fill="#16a34a">2</text>
+            <text x="68" y="50" font-size="14" font-weight="bold" text-anchor="start" fill="#16a34a">2</text>
         </svg>` 
     },
     { pairId: 4, ref: 8, svg: `
         <svg viewBox="-15 -15 130 130" class="w-full h-full">
-            <polygon points="50,0 100,90 0,90" fill="none" stroke="#3b82f6" stroke-width="3"/>
+            <polygon points="50,0 100,90 0,90" fill="none" stroke="#22c55e" stroke-width="3"/>
             
-            <text x="50" y="22" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">60°</text>
-            <text x="18" y="85" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">60°</text>
-            <text x="82" y="85" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">60°</text>
+            <text x="50" y="22" font-size="12" font-weight="bold" fill="#f97316" text-anchor="middle">60°</text>
+            <text x="18" y="85" font-size="12" font-weight="bold" fill="#f97316" text-anchor="middle">60°</text>
+            <text x="82" y="85" font-size="12" font-weight="bold" fill="#f97316" text-anchor="middle">60°</text>
             
-            <text x="50" y="105" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">8</text>
-            <text x="22" y="45" font-size="14" font-weight="bold" text-anchor="end" fill="#0369a1">8</text>
-            <text x="78" y="45" font-size="14" font-weight="bold" text-anchor="start" fill="#0369a1">8</text>
+            <text x="50" y="105" font-size="14" font-weight="bold" text-anchor="middle" fill="#16a34a">8</text>
+            <text x="22" y="45" font-size="14" font-weight="bold" text-anchor="end" fill="#16a34a">8</text>
+            <text x="78" y="45" font-size="14" font-weight="bold" text-anchor="start" fill="#16a34a">8</text>
         </svg>` 
     },
 
     // Par 5: Triángulos Isósceles (Razón 10 o 1/10)
     { pairId: 5, ref: 1, svg: `
         <svg viewBox="-15 -15 130 130" class="w-full h-full">
-            <polygon points="50,20 85,85 15,85" fill="none" stroke="#3b82f6" stroke-width="3"/>
+            <polygon points="50,20 85,85 15,85" fill="none" stroke="#22c55e" stroke-width="3"/>
             
-            <text x="50" y="35" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">74°</text>
-            <text x="28" y="80" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">53°</text>
-            <text x="72" y="80" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">53°</text>
+            <text x="50" y="35" font-size="12" font-weight="bold" fill="#f97316" text-anchor="middle">74°</text>
+            <text x="28" y="80" font-size="12" font-weight="bold" fill="#f97316" text-anchor="middle">53°</text>
+            <text x="72" y="80" font-size="12" font-weight="bold" fill="#f97316" text-anchor="middle">53°</text>
             
-            <text x="50" y="98" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">2</text>
-            <text x="32" y="52" font-size="14" font-weight="bold" text-anchor="end" fill="#0369a1">1</text>
-            <text x="68" y="52" font-size="14" font-weight="bold" text-anchor="start" fill="#0369a1">1</text>
+            <text x="50" y="98" font-size="14" font-weight="bold" text-anchor="middle" fill="#16a34a">2</text>
+            <text x="32" y="52" font-size="14" font-weight="bold" text-anchor="end" fill="#16a34a">1</text>
+            <text x="68" y="52" font-size="14" font-weight="bold" text-anchor="start" fill="#16a34a">1</text>
         </svg>` 
     },
     { pairId: 5, ref: 10, svg: `
         <svg viewBox="-15 -15 130 130" class="w-full h-full">
-            <polygon points="50,0 100,95 0,95" fill="none" stroke="#3b82f6" stroke-width="3"/>
+            <polygon points="50,0 100,95 0,95" fill="none" stroke="#22c55e" stroke-width="3"/>
             
-            <text x="50" y="22" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">74°</text>
-            <text x="18" y="90" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">53°</text>
-            <text x="82" y="90" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">53°</text>
+            <text x="50" y="22" font-size="12" font-weight="bold" fill="#f97316" text-anchor="middle">74°</text>
+            <text x="18" y="90" font-size="12" font-weight="bold" fill="#f97316" text-anchor="middle">53°</text>
+            <text x="82" y="90" font-size="12" font-weight="bold" fill="#f97316" text-anchor="middle">53°</text>
             
-            <text x="50" y="110" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">20</text>
-            <text x="20" y="48" font-size="14" font-weight="bold" text-anchor="end" fill="#0369a1">10</text>
-            <text x="80" y="48" font-size="14" font-weight="bold" text-anchor="start" fill="#0369a1">10</text>
+            <text x="50" y="110" font-size="14" font-weight="bold" text-anchor="middle" fill="#16a34a">20</text>
+            <text x="20" y="48" font-size="14" font-weight="bold" text-anchor="end" fill="#16a34a">10</text>
+            <text x="80" y="48" font-size="14" font-weight="bold" text-anchor="start" fill="#16a34a">10</text>
         </svg>` 
     },
 
     // Par 6: Paralelogramos
     { pairId: 6, ref: 2, svg: `
         <svg viewBox="-15 -15 130 130" class="w-full h-full">
-            <polygon points="35,25 90,25 65,75 10,75" fill="none" stroke="#3b82f6" stroke-width="3"/>
+            <polygon points="35,25 90,25 65,75 10,75" fill="none" stroke="#22c55e" stroke-width="3"/>
             
-            <text x="75" y="38" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">120°</text>
-            <text x="25" y="68" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">120°</text>
-            <text x="42" y="38" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">60°</text>
-            <text x="58" y="68" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">60°</text>
+            <text x="75" y="38" font-size="12" font-weight="bold" fill="#f97316" text-anchor="middle">120°</text>
+            <text x="25" y="68" font-size="12" font-weight="bold" fill="#f97316" text-anchor="middle">120°</text>
+            <text x="42" y="38" font-size="12" font-weight="bold" fill="#f97316" text-anchor="middle">60°</text>
+            <text x="58" y="68" font-size="12" font-weight="bold" fill="#f97316" text-anchor="middle">60°</text>
             
-            <text x="62" y="20" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">4</text>
-            <text x="37" y="90" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">4</text>
-            <text x="20" y="48" font-size="14" font-weight="bold" text-anchor="end" fill="#0369a1">2</text>
-            <text x="80" y="48" font-size="14" font-weight="bold" text-anchor="start" fill="#0369a1">2</text>
+            <text x="62" y="20" font-size="14" font-weight="bold" text-anchor="middle" fill="#16a34a">4</text>
+            <text x="37" y="90" font-size="14" font-weight="bold" text-anchor="middle" fill="#16a34a">4</text>
+            <text x="20" y="48" font-size="14" font-weight="bold" text-anchor="end" fill="#16a34a">2</text>
+            <text x="80" y="48" font-size="14" font-weight="bold" text-anchor="start" fill="#16a34a">2</text>
         </svg>` 
     },
     { pairId: 6, ref: 6, svg: `
         <svg viewBox="-15 -15 130 130" class="w-full h-full">
-            <polygon points="30,10 110,10 80,90 0,90" fill="none" stroke="#3b82f6" stroke-width="3"/>
+            <polygon points="30,10 110,10 80,90 0,90" fill="none" stroke="#22c55e" stroke-width="3"/>
             
-            <text x="95" y="25" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">120°</text>
-            <text x="15" y="82" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">120°</text>
-            <text x="42" y="25" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">60°</text>
-            <text x="68" y="82" font-size="12" font-weight="bold" fill="#ef4444" text-anchor="middle">60°</text>
+            <text x="95" y="25" font-size="12" font-weight="bold" fill="#f97316" text-anchor="middle">120°</text>
+            <text x="15" y="82" font-size="12" font-weight="bold" fill="#f97316" text-anchor="middle">120°</text>
+            <text x="42" y="25" font-size="12" font-weight="bold" fill="#f97316" text-anchor="middle">60°</text>
+            <text x="68" y="82" font-size="12" font-weight="bold" fill="#f97316" text-anchor="middle">60°</text>
             
-            <text x="70" y="5" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">12</text>
-            <text x="40" y="105" font-size="14" font-weight="bold" text-anchor="middle" fill="#0369a1">12</text>
-            <text x="10" y="48" font-size="14" font-weight="bold" text-anchor="end" fill="#0369a1">6</text>
-            <text x="100" y="48" font-size="14" font-weight="bold" text-anchor="start" fill="#0369a1">6</text>
+            <text x="70" y="5" font-size="14" font-weight="bold" text-anchor="middle" fill="#16a34a">12</text>
+            <text x="40" y="105" font-size="14" font-weight="bold" text-anchor="middle" fill="#16a34a">12</text>
+            <text x="10" y="48" font-size="14" font-weight="bold" text-anchor="end" fill="#16a34a">6</text>
+            <text x="100" y="48" font-size="14" font-weight="bold" text-anchor="start" fill="#16a34a">6</text>
         </svg>` 
     }
 ];
@@ -2548,6 +2597,257 @@ function mostrarMensajeGrafico(texto, tipo) {
         msgDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-lg"></i> <span>${texto}</span>`;
     }
 }
+
+// --- SECTION 8: DE LA EXPRESIÓN AL GRÁFICO ---
+        let canvasExp, ctxExp;
+        const expScale = 20; // 20px = 1 unidad
+        const expOffset = 200; // Centro en (200,200)
+
+        let currentParabola = { h: 0, k: 0, a: 1 };
+        let targetParabola = { h: 0, k: 0, a: 1 };
+        let isDraggingVertex = false;
+
+        const listaExpresiones = [
+            // Forma canónica básica
+            { text: "f(x) = (x - 3)² + 2", a: 1, h: 3, k: 2 },
+            { text: "f(x) = (x + 4)² - 5", a: 1, h: -4, k: -5 },
+            { text: "f(x) = -(x - 2)² + 3", a: -1, h: 2, k: 3 },
+            { text: "f(x) = -(x + 1)² - 4", a: -1, h: -1, k: -4 },
+            { text: "f(x) = (x - 5)² - 3", a: 1, h: 5, k: -3 },
+            { text: "f(x) = (x + 2)² + 4", a: 1, h: -2, k: 4 },
+            { text: "f(x) = -(x - 6)² - 2", a: -1, h: 6, k: -2 },
+            { text: "f(x) = -(x + 5)² + 1", a: -1, h: -5, k: 1 },
+            { text: "f(x) = (x - 7)² + 1", a: 1, h: 7, k: 1 },
+            { text: "f(x) = (x + 6)² + 3", a: 1, h: -6, k: 3 },
+            { text: "f(x) = -(x - 4)² + 5", a: -1, h: 4, k: 5 },
+            { text: "f(x) = -(x + 3)² + 6", a: -1, h: -3, k: 6 },
+            { text: "f(x) = (x - 1)² - 7", a: 1, h: 1, k: -7 },
+            { text: "f(x) = (x + 8)² - 2", a: 1, h: -8, k: -2 },
+            { text: "f(x) = -(x - 8)² + 4", a: -1, h: 8, k: 4 },
+            { text: "f(x) = -(x + 7)² - 5", a: -1, h: -7, k: -5 },
+            { text: "f(x) = (x - 2)² + 8", a: 1, h: 2, k: 8 },
+            { text: "f(x) = (x + 5)² - 6", a: 1, h: -5, k: -6 },
+            { text: "f(x) = -(x - 1)² - 8", a: -1, h: 1, k: -8 },
+            { text: "f(x) = -(x + 4)² + 7", a: -1, h: -4, k: 7 },
+            // Factorización: Cuadrados de binomio (desplazamiento horizontal)
+            { text: "f(x) = x² - 6x + 9", a: 1, h: 3, k: 0 }, 
+            { text: "f(x) = x² + 8x + 16", a: 1, h: -4, k: 0 },
+            { text: "f(x) = -(x² - 4x + 4)", a: -1, h: 2, k: 0 },
+            // Factorización: Suma por diferencia / desarrollo (desplazamiento vertical)
+            { text: "f(x) = (x - 2)(x + 2)", a: 1, h: 0, k: -4 },
+            { text: "f(x) = -(x - 3)(x + 3)", a: -1, h: 0, k: 9 }, // Se sale del -10 al 10 usual, podemos cambiar a 3
+            { text: "f(x) = (x - 3)(x + 3)", a: 1, h: 0, k: -9 },
+            { text: "f(x) = (x + 1)² - 2x + 3", a: 1, h: 0, k: 4 } // x² + 2x + 1 - 2x + 3 = x² + 4
+        ];
+
+        function initExpresionGrafico() {
+            canvasExp = document.getElementById('canvas-expresion');
+            ctxExp = canvasExp.getContext('2d');
+            
+            currentParabola = { h: 0, k: 0, a: 1 };
+            
+            // Evitar duplicar listeners clonando el canvas
+            const newCanvas = canvasExp.cloneNode(true);
+            canvasExp.parentNode.replaceChild(newCanvas, canvasExp);
+            canvasExp = newCanvas;
+            ctxExp = canvasExp.getContext('2d');
+            
+            const randomIndex = Math.floor(Math.random() * listaExpresiones.length);
+            targetParabola = listaExpresiones[randomIndex];
+            document.getElementById('target-expression').innerText = targetParabola.text;
+            
+            const msj = document.getElementById('mensaje-expresion-grafico');
+            msj.classList.add('hidden');
+            
+            dibujarPlanoExp();
+            
+            canvasExp.addEventListener('mousedown', startDragExp);
+            canvasExp.addEventListener('mousemove', dragExp);
+            canvasExp.addEventListener('mouseup', endDragExp);
+            canvasExp.addEventListener('mouseleave', endDragExp);
+        }
+
+function dibujarPlanoExp() {
+            ctxExp.clearRect(0, 0, 400, 400);
+            
+            const isDark = document.documentElement.classList.contains('dark');
+            
+            // 1. Cuadrícula
+            ctxExp.strokeStyle = isDark ? '#334155' : '#e2e8f0';
+            ctxExp.lineWidth = 1;
+            for (let i = 0; i <= 400; i += expScale) {
+                ctxExp.beginPath(); ctxExp.moveTo(i, 0); ctxExp.lineTo(i, 400); ctxExp.stroke();
+                ctxExp.beginPath(); ctxExp.moveTo(0, i); ctxExp.lineTo(400, i); ctxExp.stroke();
+            }
+            
+            // Colores para ejes y textos
+            const axisColor = isDark ? '#94a3b8' : '#64748b';
+            ctxExp.strokeStyle = axisColor;
+            ctxExp.fillStyle = axisColor;
+            ctxExp.lineWidth = 2;
+            
+            // 2. Líneas de los Ejes
+            ctxExp.beginPath(); ctxExp.moveTo(200, 10); ctxExp.lineTo(200, 390); ctxExp.stroke(); // Eje Y
+            ctxExp.beginPath(); ctxExp.moveTo(10, 200); ctxExp.lineTo(390, 200); ctxExp.stroke(); // Eje X
+            
+            // 3. Puntas de Flecha (tamaño = 6)
+            const arr = 6;
+            // Flecha Y arriba
+            ctxExp.beginPath(); ctxExp.moveTo(200, 0); ctxExp.lineTo(200 - arr, arr * 2); ctxExp.lineTo(200 + arr, arr * 2); ctxExp.fill();
+            // Flecha Y abajo
+            ctxExp.beginPath(); ctxExp.moveTo(200, 400); ctxExp.lineTo(200 - arr, 400 - arr * 2); ctxExp.lineTo(200 + arr, 400 - arr * 2); ctxExp.fill();
+            // Flecha X derecha
+            ctxExp.beginPath(); ctxExp.moveTo(400, 200); ctxExp.lineTo(400 - arr * 2, 200 - arr); ctxExp.lineTo(400 - arr * 2, 200 + arr); ctxExp.fill();
+            // Flecha X izquierda
+            ctxExp.beginPath(); ctxExp.moveTo(0, 200); ctxExp.lineTo(arr * 2, 200 - arr); ctxExp.lineTo(arr * 2, 200 + arr); ctxExp.fill();
+            
+            // 4. Numeración de ejes (de 2 en 2)
+            ctxExp.font = "11px sans-serif";
+            ctxExp.textAlign = "center";
+            ctxExp.textBaseline = "middle";
+            
+            for (let i = -10; i <= 10; i += 2) {
+                if (i === 0) continue; // Omitir el cero para limpieza visual
+                
+                // Números en el eje X
+                let px = expOffset + i * expScale;
+                ctxExp.fillText(i, px, expOffset + 14);
+                
+                // Números en el eje Y (el Y en canvas crece hacia abajo, por eso se resta)
+                let py = expOffset - i * expScale;
+                ctxExp.fillText(i, expOffset - 14, py);
+            }
+            
+            // 5. Dibujo de la Parábola Interactiva
+            ctxExp.beginPath();
+            ctxExp.strokeStyle = '#f97316'; 
+            ctxExp.lineWidth = 3;
+            for (let px = 0; px <= 400; px++) {
+                let x = (px - expOffset) / expScale;
+                let y = currentParabola.a * Math.pow((x - currentParabola.h), 2) + currentParabola.k;
+                let py = expOffset - (y * expScale);
+                if (px === 0) ctxExp.moveTo(px, py);
+                else ctxExp.lineTo(px, py);
+            }
+            ctxExp.stroke();
+            
+            // 6. Vértice arrastrable
+            let vx = expOffset + currentParabola.h * expScale;
+            let vy = expOffset - currentParabola.k * expScale;
+            ctxExp.beginPath();
+            ctxExp.arc(vx, vy, 6, 0, Math.PI * 2);
+            ctxExp.fillStyle = '#ea580c';
+            ctxExp.fill();
+            ctxExp.strokeStyle = '#fff';
+            ctxExp.lineWidth = 2;
+            ctxExp.stroke();
+        }
+
+        function getMousePosExp(evt) {
+            const rect = canvasExp.getBoundingClientRect();
+            return { x: evt.clientX - rect.left, y: evt.clientY - rect.top };
+        }
+
+        function startDragExp(evt) {
+            const pos = getMousePosExp(evt);
+            let vx = expOffset + currentParabola.h * expScale;
+            let vy = expOffset - currentParabola.k * expScale;
+            
+            if (Math.hypot(pos.x - vx, pos.y - vy) < 15) {
+                isDraggingVertex = true;
+                canvasExp.classList.replace('cursor-grab', 'cursor-grabbing');
+            } else {
+                let mathX = (pos.x - expOffset) / expScale;
+                let mathY = (expOffset - pos.y) / expScale;
+                let expectedY = currentParabola.a * Math.pow((mathX - currentParabola.h), 2) + currentParabola.k;
+                
+                // Si hace click cerca de la curva (margen de 2 unidades), invierte concavidad
+                if (Math.abs(mathY - expectedY) < 2) {
+                    currentParabola.a *= -1;
+                    dibujarPlanoExp();
+                }
+            }
+        }
+
+        function dragExp(evt) {
+            if (!isDraggingVertex) return;
+            const pos = getMousePosExp(evt);
+            
+            let mathX = Math.round((pos.x - expOffset) / expScale);
+            let mathY = Math.round((expOffset - pos.y) / expScale);
+            
+            currentParabola.h = Math.max(-10, Math.min(10, mathX));
+            currentParabola.k = Math.max(-10, Math.min(10, mathY));
+            
+            dibujarPlanoExp();
+        }
+
+        function endDragExp() {
+            isDraggingVertex = false;
+            canvasExp.classList.replace('cursor-grabbing', 'cursor-grab');
+        }
+
+// Función auxiliar para construir la expresión de la gráfica del usuario
+        function obtenerExpresionUsuario(a, h, k) {
+            let expr = "f(x) = ";
+            
+            // 1. Signo (concavidad)
+            if (a === -1) expr += "-";
+            
+            // 2. Desplazamiento horizontal (h)
+            if (h === 0) {
+                expr += "x²";
+            } else if (h > 0) {
+                expr += "(x - " + h + ")²";
+            } else {
+                expr += "(x + " + Math.abs(h) + ")²";
+            }
+            
+            // 3. Desplazamiento vertical (k)
+            if (k > 0) {
+                expr += " + " + k;
+            } else if (k < 0) {
+                expr += " - " + Math.abs(k);
+            }
+            
+            return expr;
+        }
+
+function comprobarGrafica() {
+            const msj = document.getElementById('mensaje-expresion-grafico');
+            msj.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-700', 'bg-rose-100', 'text-rose-700');
+            
+            // Obtenemos la expresión real de lo que graficó el usuario
+            const exprUsuario = obtenerExpresionUsuario(currentParabola.a, currentParabola.h, currentParabola.k);
+            
+            if (currentParabola.h === targetParabola.h && currentParabola.k === targetParabola.k && currentParabola.a === targetParabola.a) {
+                msj.classList.add('bg-emerald-100', 'text-emerald-700');
+                msj.innerHTML = `
+                    <div class="flex items-start gap-3">
+                        <i class="fa-solid fa-circle-check text-2xl mt-1"></i> 
+                        <div>
+                            <span class="block font-bold">¡Excelente! Has graficado la parábola correctamente.</span>
+                            <span class="block text-xs mt-1 opacity-80">Tu gráfica efectivamente es: ${exprUsuario}</span>
+                        </div>
+                    </div>`;
+                if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            } else {
+                msj.classList.add('bg-rose-100', 'text-rose-700');
+                msj.innerHTML = `
+                    <div class="flex items-start gap-3">
+                        <i class="fa-solid fa-circle-xmark text-2xl mt-1"></i> 
+                        <div>
+                            <span class="block font-bold">Revisa tu gráfica.</span>
+                            <span class="block text-sm mt-1">La parábola que ubicaste corresponde a:</span>
+                            <strong class="block font-mono text-rose-800 dark:text-rose-400 mt-1">${exprUsuario}</strong>
+                            <span class="block text-xs mt-2 opacity-80"><i class="fa-solid fa-lightbulb"></i> Compara esto con la expresión solicitada y ajusta el vértice o la concavidad.</span>
+                        </div>
+                    </div>`;
+            }
+        }
+
     </script>
 </body>
 </html>
+
+
