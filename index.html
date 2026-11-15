@@ -6,6 +6,8 @@
     <title>Mathquest</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -13,20 +15,13 @@
                 extend: {
                     colors: {
                         brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0284c7',
-                            600: '#0369a1',
-                            700: '#075985',
+                            50: '#f0f9ff', 100: '#e0f2fe', 500: '#0284c7', 600: '#0369a1', 700: '#075985',
                         },
                         accent: {
-                            500: '#8b5cf6',
-                            600: '#7c3aed',
+                            500: '#8b5cf6', 600: '#7c3aed',
                         },
                         confidence: {
-                            low: '#ef4444',
-                            mid: '#f59e0b',
-                            high: '#10b981'
+                            low: '#ef4444', mid: '#f59e0b', high: '#10b981'
                         }
                     },
                     fontFamily: {
@@ -45,29 +40,18 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         .transition-all-custom { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        /* Breathing animation for anxiety reduction section */
         @keyframes breathe {
             0%, 100% { transform: scale(1); opacity: 0.8; }
             50% { transform: scale(1.4); opacity: 1; }
         }
-        .animate-breathe {
-            animation: breathe 8s infinite ease-in-out;
-        }
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.05);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(0,0,0,0.2);
-            border-radius: 4px;
-        }
+        .animate-breathe { animation: breathe 8s infinite ease-in-out; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 4px; }
     </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-full flex flex-col transition-colors duration-300">
 
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-full flex flex-col transition-colors duration-300">
     <!-- NAVIGATION HEADER -->
     <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-800/90 backdrop-blur border-b border-slate-200 dark:border-slate-700 px-4 lg:px-8 py-3 transition-colors">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
@@ -149,6 +133,10 @@
                 <button onclick="showSection('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/30">
                     <i class="fa-solid fa-compass text-lg w-5"></i>
                     <span>Panel Principal</span>
+                </button>
+               <button onclick="showSection('evaluacion'); initEvaluacion();" id="nav-evaluacion" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                    <i class="fa-solid fa-clipboard-check text-lg text-indigo-500 w-5"></i>
+                    <span>Mini-Prueba</span>
                 </button>
                 <button onclick="showSection('seleccionar_mision')" id="nav-seleccionar_mision" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
                     <i class="fa-solid fa-list-check text-lg w-5"></i>
@@ -279,7 +267,75 @@
                     </div>
                 </div>
             </section>
+<!-- SECTION 7: EVALUACIÓN Y RETROALIMENTACIÓN -->
+<section id="section-evaluacion" class="hidden space-y-6">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm min-h-[400px] flex flex-col">
+        
+        <div class="flex justify-between items-start mb-6 border-b border-slate-100 dark:border-slate-700 pb-4">
+            <h3 class="font-bold text-slate-900 dark:text-white text-lg flex items-center gap-2">
+                <i class="fa-solid fa-clipboard-check text-indigo-500"></i> Evaluación de Avance
+            </h3>
+            <span class="bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                5 Preguntas
+            </span>
+        </div>
 
+        <!-- PANTALLA 1: INGRESO -->
+        <div id="eval-pantalla-ingreso" class="flex-1 flex flex-col justify-center items-center text-center space-y-4">
+            <div class="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center text-3xl mb-2">
+                <i class="fa-solid fa-user-graduate"></i>
+            </div>
+            <h4 class="text-xl font-bold text-slate-800 dark:text-white">¡Ponte a prueba!</h4>
+            <p class="text-sm text-slate-500 dark:text-slate-400 max-w-md">Ingresa tu nombre o apodo para comenzar. Al finalizar, recibirás un análisis de tus fortalezas según el eje temático.</p>
+            <div class="flex gap-2 w-full max-w-sm mt-4">
+                <input type="text" id="eval-nombre-input" placeholder="Ej: Matias04" class="flex-1 p-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition">
+                <button onclick="comenzarEvaluacion()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl transition shadow-md">
+                    Iniciar
+                </button>
+            </div>
+        </div>
+
+        <!-- PANTALLA 2: PREGUNTAS -->
+        <div id="eval-pantalla-preguntas" class="hidden flex-1 flex flex-col">
+            <!-- Barra de progreso -->
+            <div class="flex justify-between items-center text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider">
+                <span id="eval-eje-etiqueta">Eje Temático</span>
+                <span id="eval-contador">Pregunta 1 de 5</span>
+            </div>
+            <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2 mb-6">
+                <div id="eval-progreso-barra" class="bg-indigo-500 h-2 rounded-full transition-all duration-300" style="width: 20%"></div>
+            </div>
+
+            <!-- Pregunta -->
+            <h4 id="eval-pregunta-texto" class="text-lg md:text-xl font-bold text-slate-800 dark:text-white mb-6">
+                Cargando pregunta...
+            </h4>
+
+            <!-- Opciones -->
+            <div id="eval-opciones" class="space-y-3 flex-1">
+                <!-- Se generan con JS -->
+            </div>
+        </div>
+
+        <!-- PANTALLA 3: RESULTADOS -->
+        <div id="eval-pantalla-resultados" class="hidden flex-1 flex flex-col justify-center items-center text-center">
+            <h4 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">Evaluación Completada</h4>
+            <p id="eval-resultado-puntaje" class="text-lg font-medium text-slate-600 dark:text-slate-300 mb-6">Obtuviste <span class="font-bold text-indigo-600 dark:text-indigo-400">3/5</span> respuestas correctas.</p>
+            
+            <div class="w-full max-w-lg bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700 p-4 mb-6">
+                <h5 class="font-bold text-sm text-slate-700 dark:text-slate-300 mb-4 uppercase tracking-widest border-b border-slate-200 dark:border-slate-600 pb-2">Retroalimentación por Eje</h5>
+                <div id="eval-feedback-container" class="space-y-4 text-left">
+                    <!-- Se llena con JS -->
+                </div>
+            </div>
+
+            <button onclick="initEvaluacion()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-bold py-3 px-6 rounded-xl transition flex items-center gap-2">
+                <i class="fa-solid fa-rotate"></i> Volver al Inicio
+            </button>
+        </div>
+
+    </div>
+</section>
             <!-- SECTION: SELECCIONAR MISION (Selectores en cascada) -->
             <section id="section-seleccionar_mision" class="hidden space-y-6">
                 <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
@@ -750,50 +806,229 @@
 
     <!-- JAVASCRIPT LOGIC & JSON DATA -->
     <script>
-        // 1. ESTRUCTURA DE CONTENIDOS Y SUB-EJES
-        const estructuraSimce = {
-            numeros: {
-                nombre: "Números",
-                subEjes: [
-                    { id: "1.1", nombre: "Conjuntos numéricos y operatoria" },
-                    { id: "1.2", nombre: "Potencias y raíces" },
-                    { id: "1.3", nombre: "Razones, proporciones y porcentajes" }
-                ]
-            },
-            algebra: {
-                nombre: "Álgebra",
-                subEjes: [
-                    { id: "2.1", nombre: "Lenguaje algebraico y operatoria básica" },
-                    { id: "2.2", nombre: "Productos notables y Factorización" },
-                    { id: "2.3", nombre: "Ecuaciones y Sistemas de ecuaciones" },
-                    { id: "2.4", nombre: "Funciones" }
-                ]
-            },
-            geometria: {
-                nombre: "Geometría",
-                subEjes: [
-                    { id: "3.1", nombre: "Proporcionalidad geométrica" },
-                    { id: "3.2", nombre: "Geometría Analítica" },
-                    { id: "3.3", nombre: "Perímetro, Área y Volumen" },
-                    { id: "3.4", nombre: "Ángulos y Teorema de Pitágoras" }
-                ]
-            },
-            datos_azar: {
-                nombre: "Datos y Azar",
-                subEjes: [
-                    { id: "4.1", nombre: "Representación de datos" },
-                    { id: "4.2", nombre: "Estadística descriptiva" },
-                    { id: "4.3", nombre: "Probabilidades" }
-                ]
-            }
-        };
+// --- LÓGICA DE EVALUACIÓN ---
+const bancoEvaluacion = [
+    { eje: "Números", texto: "¿Cuál es el valor aproximado de √7 en la recta numérica?", opciones: ["Entre 2 y 3", "Entre 3 y 4", "Exactamente 3.5", "Entre 1 y 2"], correcta: 0 },
+    { eje: "Números", texto: "Al operar (-3) + (-5) - (-2), el resultado es:", opciones: ["-10", "-6", "0", "-8"], correcta: 1 },
+    { eje: "Álgebra", texto: "Si superponemos la gráfica de y = x² con la de y = (x-3)², la segunda está desplazada:", opciones: ["3 unidades arriba", "3 unidades abajo", "3 unidades a la izquierda", "3 unidades a la derecha"], correcta: 3 },
+    { eje: "Álgebra", texto: "¿Cuál es la expresión factorizada de x² - 9?", opciones: ["(x-3)(x-3)", "(x+3)(x-3)", "(x-9)(x+1)", "x(x-9)"], correcta: 1 },
+    { eje: "Geometría", texto: "Si dos triángulos son semejantes con una razón de 1:2, la razón de sus áreas será:", opciones: ["1:2", "1:4", "2:1", "1:8"], correcta: 1 }
+];
 
-        const nivelesDificultad = {
-            "Insuficiente": 1,
-            "Elemental": 2,
-            "Adecuado": 3
-        };
+let evalEstado = {
+    nombre: "",
+    nombreId: "", // Ruta segura para Firebase sin símbolos prohibidos
+    preguntaActual: 0,
+    respuestasUsuario: [], // Guardará {eje, esCorrecta}
+    preguntasMezcladas: []
+};
 
+// Garantiza la conexión a Firebase aunque no se haya declarado 'db' previamente
+function obtenerConexionFirebase() {
+    if (typeof firebase === 'undefined') {
+        return null;
+    }
+    if (!firebase.apps.length) {
+        firebase.initializeApp({
+            apiKey: "AIzaSyDaUTz3BnaH9pv_JqVgOzrn8c-ouNeuQGM",
+            authDomain: "mathquest-6d058.firebaseapp.com",
+            databaseURL: "https://mathquest-6d058-default-rtdb.firebaseio.com",
+            projectId: "mathquest-6d058",
+            storageBucket: "mathquest-6d058.firebasestorage.app",
+            messagingSenderId: "23144771622",
+            appId: "1:23144771622:web:18c5f496e93efdeaac36e7"
+        });
+    }
+    return firebase.database();
+}
+
+function initEvaluacion() {
+    document.getElementById('eval-nombre-input').value = "";
+    document.getElementById('eval-pantalla-ingreso').classList.remove('hidden');
+    document.getElementById('eval-pantalla-preguntas').classList.add('hidden');
+    document.getElementById('eval-pantalla-resultados').classList.add('hidden');
+    evalEstado.preguntaActual = 0;
+    evalEstado.respuestasUsuario = [];
+}
+
+function comenzarEvaluacion() {
+    const nombre = document.getElementById('eval-nombre-input').value.trim();
+    if (!nombre) return alert("Por favor, ingresa tu nombre.");
+    
+    evalEstado.nombre = nombre;
+    evalEstado.nombreId = nombre.replace(/[.#$\[\]]/g, "_");
+    evalEstado.preguntasMezcladas = [...bancoEvaluacion].sort(() => 0.5 - Math.random());
+
+    // 1. Cambiar de pantalla primero para que la prueba nunca se trabe
+    document.getElementById('eval-pantalla-ingreso').classList.add('hidden');
+    document.getElementById('eval-pantalla-preguntas').classList.remove('hidden');
+    mostrarPregunta();
+
+    // 2. FIREBASE: Registrar inicio de forma segura
+    const database = obtenerConexionFirebase();
+    if (database) {
+        database.ref('evaluaciones/' + evalEstado.nombreId).set({
+            nombre: evalEstado.nombre,
+            estado: "En curso",
+            preguntaActual: 1,
+            puntaje: 0,
+            ultimaActualizacion: new Date().toLocaleTimeString()
+        }).catch(err => alert("Error de Firebase al guardar: " + err.message));
+    } else {
+        alert("No se detectó la librería de Firebase. Verifica que los scripts de Firebase 8.10.1 estén cargados antes de este código.");
+    }
+}
+
+function mostrarPregunta() {
+    const p = evalEstado.preguntasMezcladas[evalEstado.preguntaActual];
+    
+    document.getElementById('eval-contador').innerText = `Pregunta ${evalEstado.preguntaActual + 1} de 5`;
+    document.getElementById('eval-eje-etiqueta').innerText = `Eje: ${p.eje}`;
+    document.getElementById('eval-progreso-barra').style.width = `${((evalEstado.preguntaActual + 1) / 5) * 100}%`;
+    document.getElementById('eval-pregunta-texto').innerText = p.texto;
+
+    const opcionesDiv = document.getElementById('eval-opciones');
+    opcionesDiv.innerHTML = '';
+
+    // Mezclar opciones
+    let opcionesConIndex = p.opciones.map((txt, index) => ({txt, index}));
+    opcionesConIndex.sort(() => 0.5 - Math.random());
+
+    opcionesConIndex.forEach(op => {
+        const btn = document.createElement('button');
+        btn.className = "w-full text-left p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-all font-medium text-slate-700 dark:text-slate-200";
+        btn.innerText = op.txt;
+        btn.onclick = () => responderPregunta(op.index === p.correcta, p.eje);
+        opcionesDiv.appendChild(btn);
+    });
+
+    // FIREBASE: Actualizar avance de pregunta
+    if (evalEstado.preguntaActual > 0) {
+        const database = obtenerConexionFirebase();
+        if (database) {
+            database.ref('evaluaciones/' + evalEstado.nombreId).update({
+                preguntaActual: evalEstado.preguntaActual + 1,
+                ultimaActualizacion: new Date().toLocaleTimeString()
+            }).catch(err => console.error("Error Firebase al actualizar:", err));
+        }
+    }
+}
+
+function responderPregunta(esCorrecta, eje) {
+    evalEstado.respuestasUsuario.push({ eje, esCorrecta });
+    evalEstado.preguntaActual++;
+
+    if (evalEstado.preguntaActual < 5) {
+        mostrarPregunta();
+    } else {
+        mostrarResultados();
+    }
+}
+
+function mostrarResultados() {
+    document.getElementById('eval-pantalla-preguntas').classList.add('hidden');
+    document.getElementById('eval-pantalla-resultados').classList.remove('hidden');
+
+    const buenas = evalEstado.respuestasUsuario.filter(r => r.esCorrecta).length;
+    document.getElementById('eval-resultado-puntaje').innerHTML = `Obtuviste <span class="font-bold text-indigo-600 dark:text-indigo-400">${buenas}/5</span> respuestas correctas.`;
+
+    // Analizar por Eje Temático
+    const feedbackContainer = document.getElementById('eval-feedback-container');
+    feedbackContainer.innerHTML = '';
+    
+    const analisisEjes = {};
+    evalEstado.respuestasUsuario.forEach(r => {
+        if (!analisisEjes[r.eje]) analisisEjes[r.eje] = { total: 0, buenas: 0 };
+        analisisEjes[r.eje].total++;
+        if (r.esCorrecta) analisisEjes[r.eje].buenas++;
+    });
+
+    // Generar consejos
+    for (const [eje, datos] of Object.entries(analisisEjes)) {
+        const porcentaje = datos.buenas / datos.total;
+        let mensaje, icono, color;
+
+        if (porcentaje === 1) {
+            mensaje = "¡Excelente dominio! No necesitas repaso urgente.";
+            icono = "fa-check-circle"; color = "text-teal-500";
+        } else if (porcentaje >= 0.5) {
+            mensaje = "Buen trabajo, pero revisa tus apuntes para consolidar.";
+            icono = "fa-triangle-exclamation"; color = "text-amber-500";
+        } else {
+            mensaje = "Te recomendamos repasar este eje; utiliza el Dashboard para practicar.";
+            icono = "fa-circle-xmark"; color = "text-rose-500";
+        }
+
+        feedbackContainer.innerHTML += `
+            <div class="flex items-start gap-3">
+                <i class="fa-solid ${icono} ${color} mt-1"></i>
+                <div>
+                    <span class="font-bold text-slate-800 dark:text-white block text-sm">${eje} (${datos.buenas}/${datos.total})</span>
+                    <span class="text-xs text-slate-500 dark:text-slate-400">${mensaje}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    if (buenas === 5) {
+        if (typeof confetti !== 'undefined') confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
+    }
+
+    // FIREBASE: Registrar cierre, puntaje final y desglose por eje
+    const database = obtenerConexionFirebase();
+    if (database) {
+        database.ref('evaluaciones/' + evalEstado.nombreId).update({
+            estado: "Terminado",
+            puntaje: buenas,
+            ejes: analisisEjes,
+            ultimaActualizacion: new Date().toLocaleTimeString()
+        }).catch(err => console.error("Error Firebase al finalizar:", err));
+    }
+}
+
+// 1. ESTRUCTURA DE CONTENIDOS Y SUB-EJES
+const estructuraSimce = {
+    numeros: {
+        nombre: "Números",
+        subEjes: [
+            { id: "1.1", nombre: "Conjuntos numéricos y operatoria" },
+            { id: "1.2", nombre: "Potencias y raíces" },
+            { id: "1.3", nombre: "Razones, proporciones y porcentajes" }
+        ]
+    },
+    algebra: {
+        nombre: "Álgebra",
+        subEjes: [
+            { id: "2.1", nombre: "Lenguaje algebraico y operatoria básica" },
+            { id: "2.2", nombre: "Productos notables y Factorización" },
+            { id: "2.3", nombre: "Ecuaciones y Sistemas de ecuaciones" },
+            { id: "2.4", nombre: "Funciones" }
+        ]
+    },
+    geometria: {
+        nombre: "Geometría",
+        subEjes: [
+            { id: "3.1", nombre: "Proporcionalidad geométrica" },
+            { id: "3.2", nombre: "Geometría Analítica" },
+            { id: "3.3", nombre: "Perímetro, Área y Volumen" },
+            { id: "3.4", nombre: "Ángulos y Teorema de Pitágoras" }
+        ]
+    },
+    datos_azar: {
+        nombre: "Datos y Azar",
+        subEjes: [
+            { id: "4.1", nombre: "Representación de datos" },
+            { id: "4.2", nombre: "Estadística descriptiva" },
+            { id: "4.3", nombre: "Probabilidades" }
+        ]
+    }
+};
+
+const nivelesDificultad = {
+    "Insuficiente": 1,
+    "Elemental": 2,
+    "Adecuado": 3
+};
         // 2. BANCO DE PREGUNTAS MOCKUP & GENERADORES DINÁMICOS
 
         // Función para generar pregunta parametrizada de Álgebra
@@ -1500,7 +1735,7 @@
 
         // 4. UI FUNCTIONS
 function showSection(sectionId) {
-    ['section-dashboard', 'section-seleccionar_mision', 'section-missions', 'section-calm', 'section-kahooma', 'section-matriz', 'section-semejanza', 'section-grafico-expresion', 'section-expresion-grafico', 'section-recta'].forEach(id => {
+    ['section-dashboard', 'section-seleccionar_mision', 'section-missions', 'section-calm', 'section-kahooma', 'section-matriz', 'section-semejanza', 'section-grafico-expresion', 'section-expresion-grafico', 'section-recta', 'section-evaluacion'].forEach(id => {
                 const el = document.getElementById(id);
                 if(el) {
                     el.classList.add('hidden');
