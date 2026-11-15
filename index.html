@@ -166,6 +166,10 @@
                     <i class="fa-solid fa-clone text-lg text-emerald-500 w-5"></i>
                     <span>Figuras Semejantes</span>
                 </button>
+                <button onclick="showSection('recta'); initRecta();" id="nav-recta" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+    <i class="fa-solid fa-ruler-horizontal text-lg text-teal-500 w-5"></i>
+    <span>Recta Numérica</span>
+                </button>
                 <!-- Nuevo botón: Gráfico a Expresión -->
 <button onclick="showSection('grafico-expresion'); initGraficoExpresion();" id="nav-grafico-expresion" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
     <i class="fa-solid fa-chart-line text-lg text-rose-500 w-5"></i>
@@ -475,7 +479,6 @@
                             <i class="fa-solid fa-rotate"></i> Generar Nuevos Tableros
                         </button>
                     </div>
-                </div>
             </section>
 <!-- SECTION 5: BINGO MATEMÁTICO (CON VIDAS) -->
             <section id="section-matriz" class="hidden space-y-6">
@@ -587,7 +590,53 @@
                     </div>
                 </div>
             </section>
+<!-- SECTION 6: ORDENAR EN LA RECTA NUMÉRICA -->
+<section id="section-recta" class="hidden space-y-6">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 md:p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
+        <div class="flex justify-between items-start mb-2">
+            <h3 class="font-bold text-slate-900 dark:text-white text-lg flex items-center gap-2">
+                <i class="fa-solid fa-layer-group text-teal-500"></i> Ordenar en la Recta
+            </h3>
+            <span class="bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                Raíces y Potencias Avanzadas
+            </span>
+        </div>
+        
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">
+            Selecciona un número de la bandeja. Si es exacto (ej. √4), ubícalo <strong>sobre la marca</strong> del entero. Si es inexacto (ej. √5), ubícalo en el <strong>espacio entre</strong> los enteros. ¡Ordena de menor a mayor!
+        </p>
 
+        <!-- Bandeja de Números -->
+        <div class="mb-8">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-3 text-center">Bandeja de Números</span>
+            <div id="recta-pool" onclick="clickBandeja()" class="min-h-[70px] bg-slate-50 dark:bg-slate-900/50 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 p-3 flex flex-wrap justify-center items-center gap-2 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800/50 cursor-pointer">
+                <!-- Tarjetas generadas por JS -->
+            </div>
+        </div>
+
+        <!-- Recta Numérica Interactiva (Fija y Ajustable) -->
+        <div class="relative w-full py-6 select-none">
+            <!-- Línea visual de fondo central -->
+            <div class="absolute left-2 right-2 md:left-4 md:right-4 top-1/2 h-1 bg-slate-300 dark:bg-slate-600 -translate-y-1/2 rounded-full z-0"></div>
+            
+            <div class="relative z-10 flex justify-between items-stretch w-full px-0">
+                <!-- Estructura generada dinámicamente por JS -->
+                <div id="recta-linea-container" class="flex items-stretch w-full justify-between"></div>
+            </div>
+        </div>
+
+        <div id="mensaje-recta" class="hidden p-4 rounded-xl font-medium text-sm flex items-center justify-center gap-2 max-w-lg mx-auto mt-6 text-center"></div>
+
+        <div class="mt-8 flex justify-center border-t border-slate-100 dark:border-slate-700/60 pt-6 gap-3">
+            <button onclick="comprobarOrdenRecta()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 md:px-8 rounded-xl transition shadow-md shadow-teal-500/20 flex items-center gap-2 text-sm md:text-base">
+                <i class="fa-solid fa-check-double"></i> Comprobar
+            </button>
+            <button onclick="initRecta()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-bold py-3 px-4 md:px-6 rounded-xl transition flex items-center gap-2 text-sm md:text-base">
+                <i class="fa-solid fa-rotate"></i> Nueva Tanda
+            </button>
+        </div>
+    </div>
+</section>
             <!-- SECTION 7: DEL GRÁFICO A LA EXPRESIÓN -->
 <section id="section-grafico-expresion" class="hidden space-y-6">
     <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
@@ -1450,8 +1499,8 @@
         let selectedExecOption = null;
 
         // 4. UI FUNCTIONS
-          function showSection(sectionId) {
-          ['section-dashboard', 'section-seleccionar_mision', 'section-missions', 'section-calm', 'section-kahooma', 'section-matriz', 'section-semejanza', 'section-grafico-expresion', 'section-expresion-grafico'].forEach(id => {
+function showSection(sectionId) {
+    ['section-dashboard', 'section-seleccionar_mision', 'section-missions', 'section-calm', 'section-kahooma', 'section-matriz', 'section-semejanza', 'section-grafico-expresion', 'section-expresion-grafico', 'section-recta'].forEach(id => {
                 const el = document.getElementById(id);
                 if(el) {
                     el.classList.add('hidden');
@@ -2516,6 +2565,256 @@ const bancoFiguras = [
                 }, 300);
             }
         }  
+// --- LÓGICA DE ORDENAR EN LA RECTA NUMÉRICA ---
+const bancoNumerosRecta = [
+    // NEGATIVOS - Mayoría inexactos (-15 a 0)
+    { text: "-√220", val: -14.83 }, { text: "-√200", val: -14.14 }, { text: "-√180", val: -13.41 },
+    { text: "-√160", val: -12.64 }, { text: "-√150", val: -12.24 }, { text: "-√130", val: -11.40 },
+    { text: "-√115", val: -10.72 }, { text: "-√95", val: -9.74 }, { text: "-√85", val: -9.21 },
+    { text: "-√75", val: -8.66 }, { text: "-√60", val: -7.74 }, { text: "-√50", val: -7.07 },
+    { text: "-√42", val: -6.48 }, { text: "-√32", val: -5.65 }, { text: "-√28", val: -5.29 },
+    { text: "-√22", val: -4.69 }, { text: "-√18", val: -4.24 }, { text: "-√12", val: -3.46 },
+    { text: "-√8", val: -2.82 }, { text: "-√6", val: -2.44 }, { text: "-√3", val: -1.73 },
+    { text: "-√2", val: -1.41 }, { text: "-∛20", val: -2.71 }, { text: "-∛50", val: -3.68 },
+    // Algunos anclajes exactos negativos
+    { text: "-√144", val: -12 }, { text: "-√81", val: -9 }, { text: "-√25", val: -5 }, 
+    { text: "-√9", val: -3 }, { text: "-1/2", val: -0.5 }, { text: "0", val: 0 },
+
+    // POSITIVOS (0 a 10) - Alta densidad de inexactos
+    { text: "√2", val: 1.41 }, { text: "√3", val: 1.73 }, { text: "√5", val: 2.23 }, 
+    { text: "√6", val: 2.44 }, { text: "√7", val: 2.64 }, { text: "√8", val: 2.82 }, 
+    { text: "√10", val: 3.16 }, { text: "√11", val: 3.31 }, { text: "√12", val: 3.46 },
+    { text: "√13", val: 3.60 }, { text: "√14", val: 3.74 }, { text: "√15", val: 3.87 },
+    { text: "√17", val: 4.12 }, { text: "√18", val: 4.24 }, { text: "√19", val: 4.35 }, 
+    { text: "√20", val: 4.47 }, { text: "√22", val: 4.69 }, { text: "√24", val: 4.89 }, 
+    { text: "√26", val: 5.09 }, { text: "√28", val: 5.29 }, { text: "√30", val: 5.47 }, 
+    { text: "√32", val: 5.65 }, { text: "√35", val: 5.91 }, { text: "√38", val: 6.16 }, 
+    { text: "√40", val: 6.32 }, { text: "√42", val: 6.48 }, { text: "√45", val: 6.70 }, 
+    { text: "√48", val: 6.92 }, { text: "√50", val: 7.07 }, { text: "√52", val: 7.21 }, 
+    { text: "√55", val: 7.41 }, { text: "√60", val: 7.74 }, { text: "√65", val: 8.06 }, 
+    { text: "√70", val: 8.36 }, { text: "√75", val: 8.66 }, { text: "√80", val: 8.94 }, 
+    { text: "√85", val: 9.21 }, { text: "√90", val: 9.48 }, { text: "√95", val: 9.74 }, 
+    { text: "√98", val: 9.89 }, { text: "√99", val: 9.94 },
+    { text: "∛10", val: 2.15 }, { text: "∛30", val: 3.10 }, { text: "∛100", val: 4.64 }, { text: "∛500", val: 7.93 },
+    // Anclajes exactos positivos (0 a 10)
+    { text: "√1", val: 1 }, { text: "4<sup>1/2</sup>", val: 2 }, { text: "√9", val: 3 }, 
+    { text: "∛64", val: 4 }, { text: "√36", val: 6 }, { text: "√64", val: 8 }, { text: "√100", val: 10 },
+
+    // POSITIVOS MAYORES (10 a 20) - Inexactos
+    { text: "√105", val: 10.24 }, { text: "√110", val: 10.48 }, { text: "√115", val: 10.72 },
+    { text: "√130", val: 11.40 }, { text: "√140", val: 11.83 }, { text: "√150", val: 12.24 },
+    { text: "√160", val: 12.64 }, { text: "√175", val: 13.22 }, { text: "√180", val: 13.41 },
+    { text: "√190", val: 13.78 }, { text: "√200", val: 14.14 }, { text: "√210", val: 14.49 },
+    { text: "√220", val: 14.83 }, { text: "√230", val: 15.16 }, { text: "√240", val: 15.49 },
+    { text: "√250", val: 15.81 }, { text: "√270", val: 16.43 }, { text: "√280", val: 16.73 },
+    { text: "√300", val: 17.32 }, { text: "√310", val: 17.60 }, { text: "√330", val: 18.16 },
+    { text: "√350", val: 18.70 }, { text: "√380", val: 19.49 }, { text: "√390", val: 19.74 },
+    // Anclajes exactos mayores
+    { text: "√121", val: 11 }, { text: "√169", val: 13 }, { text: "√256", val: 16 }, { text: "√400", val: 20 }
+];
+
+let estadoRecta = { pool: [], zonasExactas: {}, zonasIntervalos: {} };
+let tarjetaActivaRecta = null;
+let erroresRecta = [];
+let inicioRectaActual = 0;
+let finRectaActual = 10;
+
+function initRecta() {
+    // 1. Zonas dinámicas (Posibles inicios de recta de 10 unidades)
+    const puntosInicio = [-15, -10, -5, 0, 5, 10]; 
+    inicioRectaActual = puntosInicio[Math.floor(Math.random() * puntosInicio.length)];
+    finRectaActual = inicioRectaActual + 10;
+
+    // 2. Limpiar estado
+    estadoRecta.zonasExactas = {};
+    estadoRecta.zonasIntervalos = {};
+    for (let i = inicioRectaActual; i <= finRectaActual; i++) {
+        estadoRecta.zonasExactas[i] = [];
+        if (i < finRectaActual) estadoRecta.zonasIntervalos[i] = [];
+    }
+    tarjetaActivaRecta = null;
+    erroresRecta = [];
+    document.getElementById('mensaje-recta').classList.add('hidden');
+
+    // 3. Filtrar banco por el rango actual y asegurar mezcla aleatoria
+    let opcionesValidas = bancoNumerosRecta.filter(n => n.val >= inicioRectaActual && n.val <= finRectaActual);
+    opcionesValidas.sort(() => 0.5 - Math.random());
+    
+    // Tomamos 5 tarjetas para este desafío
+    estadoRecta.pool = opcionesValidas.slice(0, 5).map((num, index) => ({
+        id: `tarjeta-${index}`, text: num.text, val: num.val
+    }));
+
+    renderRecta();
+}
+
+function renderRecta() {
+    // RENDERIZAR POOL (Bandeja)
+    const poolContainer = document.getElementById('recta-pool');
+    poolContainer.innerHTML = '';
+    if(estadoRecta.pool.length === 0) {
+        poolContainer.innerHTML = '<span class="text-slate-400 text-sm">Bandeja vacía</span>';
+    } else {
+        estadoRecta.pool.forEach(tarjeta => poolContainer.appendChild(crearElementoTarjeta(tarjeta, true)));
+    }
+
+    // RENDERIZAR LÍNEA (Marcas e Intervalos flexibles)
+    const lineaContainer = document.getElementById('recta-linea-container');
+    lineaContainer.innerHTML = '';
+
+    for (let i = inicioRectaActual; i <= finRectaActual; i++) {
+        // 1. ZONA EXACTA (Marca del número)
+        const marcadorDiv = document.createElement('div');
+        // Se hace más delgada en móviles para que quepa (w-6 a w-10)
+        marcadorDiv.className = "flex flex-col items-center justify-center z-10 w-7 md:w-10 min-h-[4rem] rounded-lg border-2 border-transparent hover:border-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/40 cursor-pointer transition-all py-1";
+        marcadorDiv.onclick = (e) => { e.stopPropagation(); clickZona('exacta', i); };
+        
+        if (estadoRecta.zonasExactas[i].length > 0) {
+            estadoRecta.zonasExactas[i].forEach(tarjeta => marcadorDiv.appendChild(crearElementoTarjeta(tarjeta, false)));
+        } else {
+            marcadorDiv.innerHTML = `
+                <div class="w-1 md:w-1.5 h-4 md:h-6 bg-slate-700 dark:bg-slate-400 rounded-full mb-1"></div>
+                <span class="font-bold text-slate-700 dark:text-slate-300 text-[10px] md:text-sm">${i}</span>
+            `;
+        }
+        lineaContainer.appendChild(marcadorDiv);
+
+        // 2. ZONA DE INTERVALO
+        if (i < finRectaActual) {
+            const zonaDiv = document.createElement('div');
+            // flex-1 permite que el espacio se expanda como un acordeón
+            zonaDiv.className = "flex-1 min-h-[4rem] mx-0.5 md:mx-1 flex flex-wrap items-center justify-center gap-1 p-0.5 rounded-lg transition-all border-2 border-transparent hover:border-teal-300 hover:bg-teal-50/50 dark:hover:bg-teal-900/30 cursor-pointer";
+            zonaDiv.onclick = (e) => { e.stopPropagation(); clickZona('intervalo', i); };
+
+            estadoRecta.zonasIntervalos[i].forEach(tarjeta => zonaDiv.appendChild(crearElementoTarjeta(tarjeta, false)));
+            lineaContainer.appendChild(zonaDiv);
+        }
+    }
+}
+
+function crearElementoTarjeta(tarjeta, enBandeja) {
+    const el = document.createElement('div');
+    const esActiva = tarjetaActivaRecta === tarjeta.id;
+    const tieneError = erroresRecta.includes(tarjeta.id);
+
+    // Si está en la recta, la tarjeta se encoge un poco para no romper el diseño en pantallas pequeñas
+    const sizeClasses = enBandeja 
+        ? "px-3 py-2 text-sm md:text-base min-w-[3rem]" 
+        : "px-1 md:px-2 py-0.5 md:py-1 text-[9px] md:text-xs leading-none";
+
+    el.className = `${sizeClasses} rounded font-bold cursor-pointer transition-all duration-200 select-none flex items-center justify-center text-center shadow`;
+    
+    if (tieneError) el.className += " bg-rose-100 text-rose-700 border-2 border-rose-500 animate-shake";
+    else if (esActiva) el.className += " bg-teal-500 text-white border-2 border-teal-600 scale-110 shadow-teal-500/40 ring-2 ring-teal-300";
+    else el.className += " bg-white dark:bg-slate-700 text-slate-800 dark:text-white border border-slate-300 dark:border-slate-500 hover:border-teal-400";
+
+    el.innerHTML = tarjeta.text;
+    el.onclick = (e) => { e.stopPropagation(); clickTarjeta(tarjeta.id); };
+    return el;
+}
+
+// --- INTERACCIONES ---
+function clickTarjeta(id) {
+    tarjetaActivaRecta = (tarjetaActivaRecta === id) ? null : id;
+    erroresRecta = [];
+    document.getElementById('mensaje-recta').classList.add('hidden');
+    renderRecta();
+}
+
+function clickZona(tipo, index) {
+    if (tarjetaActivaRecta) {
+        moverTarjeta(tarjetaActivaRecta, tipo, index);
+        tarjetaActivaRecta = null;
+        renderRecta();
+    }
+}
+
+function clickBandeja() {
+    if (tarjetaActivaRecta) {
+        moverTarjeta(tarjetaActivaRecta, 'pool');
+        tarjetaActivaRecta = null;
+        renderRecta();
+    }
+}
+
+function moverTarjeta(id, destino, index = null) {
+    let tarjetaEncontrada = null;
+    
+    const idxPool = estadoRecta.pool.findIndex(t => t.id === id);
+    if (idxPool > -1) tarjetaEncontrada = estadoRecta.pool.splice(idxPool, 1)[0];
+    else {
+        for (let key in estadoRecta.zonasExactas) {
+            const idx = estadoRecta.zonasExactas[key].findIndex(t => t.id === id);
+            if (idx > -1) { tarjetaEncontrada = estadoRecta.zonasExactas[key].splice(idx, 1)[0]; break; }
+        }
+        if(!tarjetaEncontrada) {
+            for (let key in estadoRecta.zonasIntervalos) {
+                const idx = estadoRecta.zonasIntervalos[key].findIndex(t => t.id === id);
+                if (idx > -1) { tarjetaEncontrada = estadoRecta.zonasIntervalos[key].splice(idx, 1)[0]; break; }
+            }
+        }
+    }
+
+    if (!tarjetaEncontrada) return;
+
+    if (destino === 'pool') estadoRecta.pool.push(tarjetaEncontrada);
+    else if (destino === 'exacta') estadoRecta.zonasExactas[index].push(tarjetaEncontrada);
+    else if (destino === 'intervalo') estadoRecta.zonasIntervalos[index].push(tarjetaEncontrada);
+}
+
+// --- VALIDACIÓN ---
+function comprobarOrdenRecta() {
+    const mensajeDiv = document.getElementById('mensaje-recta');
+    erroresRecta = [];
+    let todoCorrecto = true;
+
+    if (estadoRecta.pool.length > 0) {
+        mensajeDiv.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-xl"></i> Quedan números en la bandeja.';
+        mensajeDiv.className = 'p-4 rounded-xl font-bold text-sm flex items-center justify-center gap-3 w-full bg-amber-100 text-amber-700 border border-amber-300';
+        mensajeDiv.classList.remove('hidden');
+        return;
+    }
+
+    // 1. Validar zonas exactas
+    for (let key in estadoRecta.zonasExactas) {
+        let valEsperado = parseInt(key);
+        estadoRecta.zonasExactas[key].forEach(carta => {
+            if (carta.val !== valEsperado) { erroresRecta.push(carta.id); todoCorrecto = false; }
+        });
+    }
+
+    // 2. Validar zonas de intervalos
+    for (let key in estadoRecta.zonasIntervalos) {
+        let limiteInf = parseInt(key);
+        let limiteSup = limiteInf + 1;
+        let cartas = estadoRecta.zonasIntervalos[key];
+        
+        for (let i = 0; i < cartas.length; i++) {
+            if (cartas[i].val <= limiteInf || cartas[i].val >= limiteSup) {
+                erroresRecta.push(cartas[i].id);
+                todoCorrecto = false;
+            }
+            if (i > 0 && cartas[i - 1].val > cartas[i].val) {
+                erroresRecta.push(cartas[i].id);
+                if (!erroresRecta.includes(cartas[i - 1].id)) erroresRecta.push(cartas[i - 1].id);
+                todoCorrecto = false;
+            }
+        }
+    }
+
+    if (todoCorrecto) {
+        mensajeDiv.innerHTML = '<i class="fa-solid fa-trophy text-2xl"></i> ¡Perfecto! Dominas el orden exacto e inexacto.';
+        mensajeDiv.className = 'p-4 rounded-xl font-bold flex items-center justify-center gap-3 w-full bg-teal-100 text-teal-700 border border-teal-300';
+        if (typeof userStats !== 'undefined') { userStats.xp += 25; if(typeof updateStatsUI === 'function') updateStatsUI(); }
+        if (typeof confetti === 'function') confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+    } else {
+        mensajeDiv.innerHTML = '<i class="fa-solid fa-xmark-circle text-2xl mt-0.5"></i> <div class="text-left">Hay errores. Si es exacto va en la marca del número; si es inexacto, en el espacio intermedio. Además, revisa que estén ordenados de menor a mayor en un mismo espacio.</div>';
+        mensajeDiv.className = 'p-4 rounded-xl font-bold flex text-left items-start gap-3 w-full bg-rose-100 text-rose-700 border border-rose-300';
+    }
+    
+    mensajeDiv.classList.remove('hidden');
+    renderRecta();
+}
         
 // --- SECTION 7: LÓGICA DEL GRÁFICO A LA EXPRESIÓN ---
 let targetH = 0;
