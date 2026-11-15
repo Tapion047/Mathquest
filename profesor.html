@@ -49,7 +49,7 @@
             </div>
             <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
                 <span class="text-xs font-bold text-indigo-400 uppercase">Promedio Curso</span>
-                <p id="stat-promedio" class="text-3xl font-extrabold text-indigo-400 mt-1">0.0 / 5</p>
+                <p id="stat-promedio" class="text-3xl font-extrabold text-indigo-400 mt-1">0.0 / 7</p>
             </div>
         </div>
 
@@ -117,6 +117,8 @@
 
             lista.forEach(([id, alumno]) => {
                 const esTerminado = alumno.estado === "Terminado";
+                const totalPreg = alumno.totalPreguntas || 7;
+
                 if (esTerminado) {
                     terminados++;
                     sumaPuntajes += (alumno.puntaje || 0);
@@ -125,11 +127,11 @@
                 }
 
                 const badgeEstado = esTerminado
-                    ? `<span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-full text-xs font-bold"><i class="fa-solid fa-check mr-1"></i> Terminado</span>`
-                    : `<span class="bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2.5 py-1 rounded-full text-xs font-bold"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Pregunta ${alumno.preguntaActual || 1} de 5</span>`;
+                    ? `<span class="inline-flex items-center gap-1.5 whitespace-nowrap bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-bold"><i class="fa-solid fa-check"></i> Terminado</span>`
+                    : `<span class="inline-flex items-center gap-1.5 whitespace-nowrap bg-amber-500/20 text-amber-400 border border-amber-500/30 px-3 py-1 rounded-full text-xs font-bold"><i class="fa-solid fa-spinner fa-spin"></i> Pregunta ${alumno.preguntaActual || 1} de ${totalPreg}</span>`;
 
                 const textoPuntaje = esTerminado
-                    ? `<span class="font-extrabold text-lg text-white">${alumno.puntaje}/5</span>`
+                    ? `<span class="font-extrabold text-lg text-white whitespace-nowrap">${alumno.puntaje}/${totalPreg}</span>`
                     : `<span class="text-slate-500">—</span>`;
 
                 let htmlEjes = `<span class="text-slate-500 text-xs">Pendiente...</span>`;
@@ -141,18 +143,18 @@
                             : res.buenas > 0
                                 ? "bg-amber-500/20 text-amber-300 border-amber-500/30"
                                 : "bg-rose-500/20 text-rose-300 border-rose-500/30";
-                        htmlEjes += `<span class="text-xs px-2 py-0.5 rounded border ${colorEje}">${eje}: ${res.buenas}/${res.total}</span>`;
+                        htmlEjes += `<span class="inline-flex items-center whitespace-nowrap text-xs px-2 py-0.5 rounded border ${colorEje}">${eje}: ${res.buenas}/${res.total}</span>`;
                     }
                     htmlEjes += `</div>`;
                 }
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-700/30 transition">
-                        <td class="p-4 font-bold text-white">${alumno.nombre || id}</td>
+                        <td class="p-4 font-bold text-white whitespace-nowrap">${alumno.nombre || id}</td>
                         <td class="p-4">${badgeEstado}</td>
                         <td class="p-4">${textoPuntaje}</td>
                         <td class="p-4">${htmlEjes}</td>
-                        <td class="p-4 text-slate-400 text-xs">${alumno.ultimaActualizacion || ''}</td>
+                        <td class="p-4 text-slate-400 text-xs whitespace-nowrap">${alumno.ultimaActualizacion || ''}</td>
                     </tr>
                 `;
             });
@@ -165,7 +167,7 @@
             document.getElementById('stat-total').innerText = total;
             document.getElementById('stat-curso').innerText = curso;
             document.getElementById('stat-terminados').innerText = terminados;
-            document.getElementById('stat-promedio').innerText = `${promedio} / 5`;
+            document.getElementById('stat-promedio').innerText = `${promedio} / 7`;
         }
 
         function limpiarRegistros() {
