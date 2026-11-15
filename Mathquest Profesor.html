@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathquest | Monitor Docente en Vivo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-6">
+
+    <div class="max-w-6xl mx-auto space-y-6">
+        
+        <!-- Encabezado -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-lg">
+            <div>
+                <div class="flex items-center gap-3">
+                    <span class="relative flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                    </span>
+                    <h1 class="text-2xl font-extrabold text-white tracking-tight">Monitor en Vivo — Mini-Prueba</h1>
+                </div>
+                <p class="text-sm text-slate-400 mt-1">Los resultados de los estudiantes se actualizan automáticamente.</p>
+            </div>
+
+            <button onclick="limpiarRegistros()" class="bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/40 font-semibold py-2.5 px-4 rounded-xl transition flex items-center gap-2 text-sm">
+                <i class="fa-solid fa-trash-can"></i> Reiniciar Clase (Borrar datos)
+            </button>
+        </header>
+
+        <!-- Tarjetas de Resumen -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                <span class="text-xs font-bold text-slate-400 uppercase">Conectados</span>
+                <p id="stat-total" class="text-3xl font-extrabold text-white mt-1">0</p>
+            </div>
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                <span class="text-xs font-bold text-amber-400 uppercase">En Curso</span>
+                <p id="stat-curso" class="text-3xl font-extrabold text-amber-400 mt-1">0</p>
+            </div>
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                <span class="text-xs font-bold text-emerald-400 uppercase">Terminados</span>
+                <p id="stat-terminados" class="text-3xl font-extrabold text-emerald-400 mt-1">0</p>
+            </div>
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                <span class="text-xs font-bold text-indigo-400 uppercase">Promedio Curso</span>
+                <p id="stat-promedio" class="text-3xl font-extrabold text-indigo-400 mt-1">0.0 / 5</p>
+            </div>
+        </div>
+
+        <!-- Tabla de Estudiantes -->
+        <div class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-lg">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-900/60 border-b border-slate-700 text-xs uppercase text-slate-400">
+                            <th class="p-4">Estudiante</th>
+                            <th class="p-4">Estado / Progreso</th>
+                            <th class="p-4">Puntaje</th>
+                            <th class="p-4">Desglose por Eje</th>
+                            <th class="p-4">Última Actividad</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-estudiantes" class="divide-y divide-slate-700/70 text-sm">
+                        <tr>
+                            <td colspan="5" class="p-8 text-center text-slate-400">
+                                Esperando que los estudiantes ingresen a la Mini-Prueba...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Firebase v8 -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDaUTz3BnaH9pv_JqVgOzrn8c-ouNeuQGM",
+            authDomain: "mathquest-6d058.firebaseapp.com",
+            databaseURL: "https://mathquest-6d058-default-rtdb.firebaseio.com",
+            projectId: "mathquest-6d058",
+            storageBucket: "mathquest-6d058.firebasestorage.app",
+            messagingSenderId: "23144771622",
+            appId: "1:23144771622:web:18c5f496e93efdeaac36e7"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
+
+        db.ref('evaluaciones').on('value', (snapshot) => {
+            const datos = snapshot.val();
+            const tbody = document.getElementById('tabla-estudiantes');
+            tbody.innerHTML = '';
+
+            if (!datos) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400">No hay estudiantes activos aún.</td></tr>`;
+                actualizarMetricas(0, 0, 0, 0);
+                return;
+            }
+
+            const lista = Object.entries(datos);
+            let enCurso = 0;
+            let terminados = 0;
+            let sumaPuntajes = 0;
+
+            lista.forEach(([id, alumno]) => {
+                const esTerminado = alumno.estado === "Terminado";
+                if (esTerminado) {
+                    terminados++;
+                    sumaPuntajes += (alumno.puntaje || 0);
+                } else {
+                    enCurso++;
+                }
+
+                const badgeEstado = esTerminado
+                    ? `<span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-full text-xs font-bold"><i class="fa-solid fa-check mr-1"></i> Terminado</span>`
+                    : `<span class="bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2.5 py-1 rounded-full text-xs font-bold"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Pregunta ${alumno.preguntaActual || 1} de 5</span>`;
+
+                const textoPuntaje = esTerminado
+                    ? `<span class="font-extrabold text-lg text-white">${alumno.puntaje}/5</span>`
+                    : `<span class="text-slate-500">—</span>`;
+
+                let htmlEjes = `<span class="text-slate-500 text-xs">Pendiente...</span>`;
+                if (esTerminado && alumno.ejes) {
+                    htmlEjes = `<div class="flex flex-wrap gap-1.5">`;
+                    for (const [eje, res] of Object.entries(alumno.ejes)) {
+                        const colorEje = res.buenas === res.total
+                            ? "bg-teal-500/20 text-teal-300 border-teal-500/30"
+                            : res.buenas > 0
+                                ? "bg-amber-500/20 text-amber-300 border-amber-500/30"
+                                : "bg-rose-500/20 text-rose-300 border-rose-500/30";
+                        htmlEjes += `<span class="text-xs px-2 py-0.5 rounded border ${colorEje}">${eje}: ${res.buenas}/${res.total}</span>`;
+                    }
+                    htmlEjes += `</div>`;
+                }
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-700/30 transition">
+                        <td class="p-4 font-bold text-white">${alumno.nombre || id}</td>
+                        <td class="p-4">${badgeEstado}</td>
+                        <td class="p-4">${textoPuntaje}</td>
+                        <td class="p-4">${htmlEjes}</td>
+                        <td class="p-4 text-slate-400 text-xs">${alumno.ultimaActualizacion || ''}</td>
+                    </tr>
+                `;
+            });
+
+            const promedio = terminados > 0 ? (sumaPuntajes / terminados).toFixed(1) : "0.0";
+            actualizarMetricas(lista.length, enCurso, terminados, promedio);
+        });
+
+        function actualizarMetricas(total, curso, terminados, promedio) {
+            document.getElementById('stat-total').innerText = total;
+            document.getElementById('stat-curso').innerText = curso;
+            document.getElementById('stat-terminados').innerText = terminados;
+            document.getElementById('stat-promedio').innerText = `${promedio} / 5`;
+        }
+
+        function limpiarRegistros() {
+            if (confirm("¿Seguro que deseas borrar todos los registros de la pantalla para iniciar una nueva clase?")) {
+                db.ref('evaluaciones').remove();
+            }
+        }
+    </script>
+</body>
+</html>
