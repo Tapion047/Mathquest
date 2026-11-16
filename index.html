@@ -168,7 +168,11 @@
                     <i class="fa-solid fa-draw-polygon text-lg text-orange-500 w-5"></i>
                     <span>De la expresión al gráfico</span>
                 </button>
-
+<!-- Nuevo botón: Suma Gráfica de Vectores -->
+                <button onclick="showSection('suma-vectores'); initSumaVectores();" id="nav-suma-vectores" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                    <i class="fa-solid fa-location-arrow text-lg text-cyan-500 w-5"></i>
+                    <span>Suma de Vectores</span>
+                </button>
                 <button onclick="showSection('calm')" id="nav-calm" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
                     <i class="fa-solid fa-spa text-lg text-emerald-500 w-5"></i>
                     <span>Pausa & Calma</span>
@@ -783,7 +787,131 @@
                     </div>
                 </div>
             </section>
+<!-- SECTION 9: SUMA GRÁFICA DE VECTORES -->
+            <section id="section-suma-vectores" class="hidden space-y-6">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-slate-900 dark:text-white text-lg flex items-center gap-2">
+                            <i class="fa-solid fa-location-arrow text-cyan-500"></i> Suma Gráfica de Vectores
+                        </h3>
+                        <span class="bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                            Método Punta y Cola
+                        </span>
+                    </div>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">
+                        Construye la suma vectorial paso a paso. Haz <strong>clic en una intersección entera</strong> para marcar el inicio del vector, estíralo hasta el punto final y haz un <strong>segundo clic</strong> para fijarlo.
+                    </p>
 
+                    <!-- Indicador de progreso de 5 pasos -->
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-6">
+                        <div id="vec-tab-1" class="p-2.5 rounded-xl border-2 border-cyan-500 bg-cyan-50/50 dark:bg-cyan-900/20 text-center transition">
+                            <div class="text-[10px] font-bold text-cyan-600 dark:text-cyan-300 uppercase">Paso 1</div>
+                            <div class="text-xs font-bold text-slate-800 dark:text-slate-100">Vector u</div>
+                        </div>
+                        <div id="vec-tab-2" class="p-2.5 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-center transition opacity-60">
+                            <div class="text-[10px] font-bold text-slate-400 uppercase">Paso 2</div>
+                            <div class="text-xs font-bold text-slate-800 dark:text-slate-100">Vector v</div>
+                        </div>
+                        <div id="vec-tab-3" class="p-2.5 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-center transition opacity-60">
+                            <div class="text-[10px] font-bold text-slate-400 uppercase">Paso 3</div>
+                            <div class="text-xs font-bold text-slate-800 dark:text-slate-100">Resultante</div>
+                        </div>
+                        <div id="vec-tab-4" class="p-2.5 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-center transition opacity-60">
+                            <div class="text-[10px] font-bold text-slate-400 uppercase">Paso 4</div>
+                            <div class="text-xs font-bold text-slate-800 dark:text-slate-100">Componentes</div>
+                        </div>
+                        <div id="vec-tab-5" class="col-span-2 sm:col-span-1 p-2.5 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-center transition opacity-60">
+                            <div class="text-[10px] font-bold text-slate-400 uppercase">Paso 5</div>
+                            <div class="text-xs font-bold text-slate-800 dark:text-slate-100">Módulo</div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col lg:flex-row gap-8 items-start justify-center">
+                        <!-- Plano Cartesiano Interactivo -->
+                        <div class="w-full max-w-[420px] mx-auto space-y-2">
+                            <div class="bg-white dark:bg-slate-900 p-2 rounded-xl border-2 border-slate-200 dark:border-slate-700 shadow-inner flex justify-center relative select-none">
+                                <canvas id="canvas-vectores" width="400" height="400" class="max-w-full h-auto bg-slate-50 dark:bg-slate-800 rounded-lg cursor-crosshair touch-none"></canvas>
+                            </div>
+                            <div class="flex justify-between items-center text-xs text-slate-500 dark:text-slate-400 px-1">
+                                <span id="vec-cursor-coords" class="font-mono font-semibold">Cursor: (0, 0)</span>
+                                <button id="btn-limpiar-trazo" onclick="limpiarTrazoVector()" class="text-cyan-600 dark:text-cyan-400 hover:underline font-semibold flex items-center gap-1">
+                                    <i class="fa-solid fa-eraser"></i> Borrar trazo actual
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Panel de Consignas y Validación -->
+                        <div class="w-full lg:w-1/2 space-y-5">
+                            <!-- Tarjeta de instrucción dinámica -->
+                            <div class="bg-slate-50 dark:bg-slate-900 p-5 rounded-xl border-2 border-slate-200 dark:border-slate-700 space-y-3">
+                                <span id="vec-paso-badge" class="inline-block text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-cyan-100 text-cyan-700 dark:bg-cyan-900/50 dark:text-cyan-300">
+                                    Paso 1 de 5
+                                </span>
+                                <h4 id="vec-instruccion-titulo" class="text-lg font-bold text-slate-800 dark:text-white">
+                                    Grafica el primer vector (u)
+                                </h4>
+                                <p id="vec-instruccion-detalle" class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                                    Marca un punto de inicio en cualquier intersección entera del plano y estira el vector según sus componentes.
+                                </p>
+
+                                <!-- Datos de vectores activos -->
+                                <div class="pt-2 flex flex-wrap gap-3 font-mono text-base font-bold">
+                                    <div id="vec-dato-u" class="px-3 py-1.5 rounded-lg bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                                        u = (0, 0)
+                                    </div>
+                                    <div id="vec-dato-v" class="hidden px-3 py-1.5 rounded-lg bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                                        v = (0, 0)
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Input numérico para el Paso 4 (permanece visible y bloqueado en el Paso 5) -->
+                            <div id="vec-panel-componentes" class="hidden bg-amber-50 dark:bg-amber-900/20 p-5 rounded-xl border border-amber-200 dark:border-amber-700/50 space-y-3">
+                                <label class="block text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">
+                                    Componentes del vector resultante (u + v):
+                                </label>
+                                <div class="flex items-center justify-center gap-2 text-xl font-mono font-bold text-slate-800 dark:text-white">
+                                    <span>u + v = (</span>
+                                    <input type="number" id="vec-input-rx" placeholder="x" class="w-20 p-2.5 text-center rounded-xl border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 outline-none focus:border-cyan-500">
+                                    <span>,</span>
+                                    <input type="number" id="vec-input-ry" placeholder="y" class="w-20 p-2.5 text-center rounded-xl border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 outline-none focus:border-cyan-500">
+                                    <span>)</span>
+                                </div>
+                            </div>
+
+                            <!-- Input exclusivo para el Paso 5 (Módulo del vector resultante) -->
+                            <div id="vec-panel-modulo" class="hidden bg-amber-50 dark:bg-amber-900/20 p-5 rounded-xl border border-amber-200 dark:border-amber-700/50 space-y-3">
+                                <label for="vec-input-modulo" class="block text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">
+                                    Calcula el módulo del vector resultante ‖u + v‖:
+                                </label>
+                                <div class="flex items-center justify-center gap-2 text-xl font-mono font-bold text-slate-800 dark:text-white">
+                                    <span>‖u + v‖ =</span>
+                                    <input type="text" id="vec-input-modulo" placeholder="ej. √29 o 5" autocomplete="off" class="w-32 p-2.5 text-center rounded-xl border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 outline-none focus:border-cyan-500">
+                                    <button type="button" onclick="insertarRaizModulo()" title="Insertar símbolo de raíz cuadrada" class="px-3.5 py-2.5 rounded-xl bg-amber-200/80 hover:bg-amber-300 dark:bg-amber-800/60 dark:hover:bg-amber-700 text-amber-950 dark:text-amber-100 font-bold text-lg transition shadow-sm">
+                                        √
+                                    </button>
+                                </div>
+                                <p class="text-[11px] text-center text-amber-800/80 dark:text-amber-300/80">
+                                    Si no es exacta, exprésala como raíz (ejemplo: <strong>√13</strong>, <strong>2√5</strong>).
+                                </p>
+                            </div>
+
+                            <!-- Retroalimentación -->
+                            <div id="mensaje-vectores" class="hidden p-4 rounded-xl font-medium text-sm flex items-start gap-2.5"></div>
+
+                            <!-- Botones de Acción -->
+                            <div class="flex flex-col sm:flex-row gap-3 pt-3 border-t border-slate-100 dark:border-slate-700/60">
+                                <button id="btn-validar-vector" onclick="validarPasoVector()" class="flex-1 bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-5 rounded-xl transition shadow-md flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-check"></i> <span id="btn-validar-vector-texto">Comprobar Vector u</span>
+                                </button>
+                                <button onclick="initSumaVectores()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-bold py-3 px-5 rounded-xl transition flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-rotate"></i> Nuevo Ejercicio
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
             <!-- SECTION 3: PAUSA Y CALMA -->
             <section id="section-calm" class="hidden h-full flex flex-col justify-center items-center py-12">
                 <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">Momento de Calma</h2>
@@ -1386,12 +1514,12 @@ let evalEstado = {
             preguntasMezcladas: []
         };
 
-        function guardarProgresoEval() {
+function guardarProgresoEval() {
             try {
                 if (evalEstado.enCurso) {
-                    localStorage.setItem(EVAL_STORAGE_KEY, JSON.stringify(evalEstado));
+                    localStorage.setItem('mathquest_eval_en_curso', JSON.stringify(evalEstado));
                 } else {
-                    localStorage.removeItem(EVAL_STORAGE_KEY);
+                    localStorage.removeItem('mathquest_eval_en_curso');
                 }
             } catch (e) {
                 console.warn("No se pudo guardar el progreso local de la evaluación:", e);
@@ -1403,7 +1531,7 @@ let evalEstado = {
                 return true;
             }
             try {
-                const guardado = localStorage.getItem(EVAL_STORAGE_KEY);
+                const guardado = localStorage.getItem('mathquest_eval_en_curso');
                 if (guardado) {
                     const parsed = JSON.parse(guardado);
                     if (
@@ -2391,8 +2519,8 @@ sueldobasebmás
         let missionResults = []; // Guarda el detalle de las 3 preguntas para la reflexión final
 
         // 4. UI FUNCTIONS
-        function showSection(sectionId) {
-            ['section-dashboard', 'section-seleccionar_mision', 'section-missions', 'section-calm', 'section-kahooma', 'section-matriz', 'section-semejanza', 'section-grafico-expresion', 'section-expresion-grafico', 'section-recta', 'section-evaluacion'].forEach(id => {
+function showSection(sectionId) {
+    ['section-dashboard', 'section-seleccionar_mision', 'section-missions', 'section-calm', 'section-kahooma', 'section-matriz', 'section-semejanza', 'section-grafico-expresion', 'section-expresion-grafico', 'section-recta', 'section-evaluacion', 'section-suma-vectores'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
                     el.classList.add('hidden');
@@ -3895,6 +4023,14 @@ let tarjetaActivaRecta = null;
 let erroresRecta = [];
 let inicioRectaActual = 0;
 let finRectaActual = 10;
+let rectaCompletada = false;
+
+function toggleBotonComprobarRecta(mostrar) {
+    const btnComprobar = document.querySelector('button[onclick*="comprobarOrdenRecta"]');
+    if (!btnComprobar) return;
+    if (mostrar) btnComprobar.classList.remove('hidden');
+    else btnComprobar.classList.add('hidden');
+}
 
 function initRecta() {
     // 1. Zonas dinámicas (Posibles inicios de recta de 10 unidades)
@@ -3902,7 +4038,7 @@ function initRecta() {
     inicioRectaActual = puntosInicio[Math.floor(Math.random() * puntosInicio.length)];
     finRectaActual = inicioRectaActual + 10;
 
-    // 2. Limpiar estado
+    // 2. Limpiar estado y restaurar botón Comprobar
     estadoRecta.zonasExactas = {};
     estadoRecta.zonasIntervalos = {};
     for (let i = inicioRectaActual; i <= finRectaActual; i++) {
@@ -3911,7 +4047,9 @@ function initRecta() {
     }
     tarjetaActivaRecta = null;
     erroresRecta = [];
+    rectaCompletada = false;
     document.getElementById('mensaje-recta').classList.add('hidden');
+    toggleBotonComprobarRecta(true);
 
     // 3. Filtrar banco por el rango actual y asegurar mezcla aleatoria
     let opcionesValidas = bancoNumerosRecta.filter(n => n.val >= inicioRectaActual && n.val <= finRectaActual);
@@ -3942,7 +4080,6 @@ function renderRecta() {
     for (let i = inicioRectaActual; i <= finRectaActual; i++) {
         // 1. ZONA EXACTA (Marca del número)
         const marcadorDiv = document.createElement('div');
-        // Se hace más delgada en móviles para que quepa (w-6 a w-10)
         marcadorDiv.className = "flex flex-col items-center justify-center z-10 w-7 md:w-10 min-h-[4rem] rounded-lg border-2 border-transparent hover:border-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/40 cursor-pointer transition-all py-1";
         marcadorDiv.onclick = (e) => { e.stopPropagation(); clickZona('exacta', i); };
         
@@ -3959,7 +4096,6 @@ function renderRecta() {
         // 2. ZONA DE INTERVALO
         if (i < finRectaActual) {
             const zonaDiv = document.createElement('div');
-            // flex-1 permite que el espacio se expanda como un acordeón
             zonaDiv.className = "flex-1 min-h-[4rem] mx-0.5 md:mx-1 flex flex-wrap items-center justify-center gap-1 p-0.5 rounded-lg transition-all border-2 border-transparent hover:border-teal-300 hover:bg-teal-50/50 dark:hover:bg-teal-900/30 cursor-pointer";
             zonaDiv.onclick = (e) => { e.stopPropagation(); clickZona('intervalo', i); };
 
@@ -3974,7 +4110,6 @@ function crearElementoTarjeta(tarjeta, enBandeja) {
     const esActiva = tarjetaActivaRecta === tarjeta.id;
     const tieneError = erroresRecta.includes(tarjeta.id);
 
-    // Si está en la recta, la tarjeta se encoge un poco para no romper el diseño en pantallas pequeñas
     const sizeClasses = enBandeja 
         ? "px-3 py-2 text-sm md:text-base min-w-[3rem]" 
         : "px-1 md:px-2 py-0.5 md:py-1 text-[9px] md:text-xs leading-none";
@@ -3992,6 +4127,7 @@ function crearElementoTarjeta(tarjeta, enBandeja) {
 
 // --- INTERACCIONES ---
 function clickTarjeta(id) {
+    if (rectaCompletada) return;
     tarjetaActivaRecta = (tarjetaActivaRecta === id) ? null : id;
     erroresRecta = [];
     document.getElementById('mensaje-recta').classList.add('hidden');
@@ -3999,6 +4135,7 @@ function clickTarjeta(id) {
 }
 
 function clickZona(tipo, index) {
+    if (rectaCompletada) return;
     if (tarjetaActivaRecta) {
         moverTarjeta(tarjetaActivaRecta, tipo, index);
         tarjetaActivaRecta = null;
@@ -4007,6 +4144,7 @@ function clickZona(tipo, index) {
 }
 
 function clickBandeja() {
+    if (rectaCompletada) return;
     if (tarjetaActivaRecta) {
         moverTarjeta(tarjetaActivaRecta, 'pool');
         tarjetaActivaRecta = null;
@@ -4041,6 +4179,8 @@ function moverTarjeta(id, destino, index = null) {
 
 // --- VALIDACIÓN ---
 function comprobarOrdenRecta() {
+    if (rectaCompletada) return;
+
     const mensajeDiv = document.getElementById('mensaje-recta');
     erroresRecta = [];
     let todoCorrecto = true;
@@ -4080,6 +4220,10 @@ function comprobarOrdenRecta() {
     }
 
     if (todoCorrecto) {
+        rectaCompletada = true;
+        tarjetaActivaRecta = null;
+        toggleBotonComprobarRecta(false);
+
         mensajeDiv.innerHTML = '<i class="fa-solid fa-trophy text-2xl"></i> ¡Perfecto! Dominas el orden exacto e inexacto.';
         mensajeDiv.className = 'p-4 rounded-xl font-bold flex items-center justify-center gap-3 w-full bg-teal-100 text-teal-700 border border-teal-300';
         if (typeof userStats !== 'undefined') { userStats.xp += 25; if(typeof updateStatsUI === 'function') updateStatsUI(); }
@@ -4581,7 +4725,625 @@ function comprobarGrafica() {
                     </div>`;
             }
         }
+// --- SECTION 9: SUMA GRÁFICA DE VECTORES ---
+let canvasVec, ctxVec;
+const vecScale = 20;   // 20px = 1 unidad
+const vecOffset = 200; // Centro (0,0) en px (200,200)
 
+let vecState = {
+    paso: 1,              // 1: graficar u, 2: graficar v, 3: graficar resultante, 4: componentes, 5: módulo, 6: completado
+    u: { x: 0, y: 0 },
+    v: { x: 0, y: 0 },
+    vecU: null,
+    vecV: null,
+    vecR: null,
+    drawMode: 'idle',
+    tempStart: null,
+    tempEnd: null,
+    draft: null,
+    hover: null
+};
+
+function initSumaVectores() {
+    canvasVec = document.getElementById('canvas-vectores');
+    if (!canvasVec) return;
+
+    const nuevoCanvas = canvasVec.cloneNode(true);
+    canvasVec.parentNode.replaceChild(nuevoCanvas, canvasVec);
+    canvasVec = nuevoCanvas;
+    ctxVec = canvasVec.getContext('2d');
+
+    const randComp = () => {
+        let n = 0;
+        while (n === 0) n = Math.floor(Math.random() * 13) - 6;
+        return n;
+    };
+
+    vecState = {
+        paso: 1,
+        u: { x: randComp(), y: randComp() },
+        v: { x: 0, y: 0 },
+        vecU: null,
+        vecV: null,
+        vecR: null,
+        drawMode: 'idle',
+        tempStart: null,
+        tempEnd: null,
+        draft: null,
+        hover: null
+    };
+
+    const rxInput = document.getElementById('vec-input-rx');
+    const ryInput = document.getElementById('vec-input-ry');
+    const modInput = document.getElementById('vec-input-modulo');
+
+    if (rxInput) { rxInput.value = ''; rxInput.disabled = false; }
+    if (ryInput) { ryInput.value = ''; ryInput.disabled = false; }
+    if (modInput) { modInput.value = ''; modInput.disabled = false; }
+
+    ocultarMensajeVector();
+    actualizarInterfazPasoVector();
+    dibujarEscenarioVectores();
+
+    canvasVec.addEventListener('pointermove', onPointerMoveVec);
+    canvasVec.addEventListener('pointerdown', onPointerDownVec);
+    canvasVec.addEventListener('pointerleave', () => {
+        vecState.hover = null;
+        dibujarEscenarioVectores();
+    });
+}
+
+function insertarRaizModulo() {
+    const input = document.getElementById('vec-input-modulo');
+    if (!input || input.disabled) return;
+    const start = input.selectionStart || input.value.length;
+    const end = input.selectionEnd || input.value.length;
+    input.value = input.value.slice(0, start) + '√' + input.value.slice(end);
+    input.focus();
+    input.setSelectionRange(start + 1, start + 1);
+}
+
+function generarVectorVCompatible(puntaU) {
+    const candidatosX = [];
+    const candidatosY = [];
+    for (let d = -6; d <= 6; d++) {
+        if (d === 0) continue;
+        if (puntaU.x + d >= -10 && puntaU.x + d <= 10) candidatosX.push(d);
+        if (puntaU.y + d >= -10 && puntaU.y + d <= 10) candidatosY.push(d);
+    }
+
+    let vx = candidatosX[Math.floor(Math.random() * candidatosX.length)];
+    let vy = candidatosY[Math.floor(Math.random() * candidatosY.length)];
+
+    if (vecState.u.x + vx === 0 && vecState.u.y + vy === 0) {
+        const altX = candidatosX.filter(val => vecState.u.x + val !== 0);
+        if (altX.length > 0) vx = altX[0];
+    }
+
+    vecState.v = { x: vx, y: vy };
+}
+
+function obtenerCoordenadasEnterasCanvas(evt) {
+    const rect = canvasVec.getBoundingClientRect();
+    const scaleX = canvasVec.width / rect.width;
+    const scaleY = canvasVec.height / rect.height;
+    const px = (evt.clientX - rect.left) * scaleX;
+    const py = (evt.clientY - rect.top) * scaleY;
+
+    const gx = Math.max(-10, Math.min(10, Math.round((px - vecOffset) / vecScale)));
+    const gy = Math.max(-10, Math.min(10, Math.round((vecOffset - py) / vecScale)));
+    return { x: gx, y: gy };
+}
+
+function onPointerMoveVec(evt) {
+    // El dibujo está activo en los pasos 1, 2 y 3
+    if ([4, 5, 6].includes(vecState.paso)) return;
+    const pos = obtenerCoordenadasEnterasCanvas(evt);
+    vecState.hover = pos;
+
+    const coordLabel = document.getElementById('vec-cursor-coords');
+    if (coordLabel) coordLabel.innerText = `Cursor: (${pos.x}, ${pos.y})`;
+
+    if (vecState.drawMode === 'stretching') {
+        vecState.tempEnd = pos;
+    }
+    dibujarEscenarioVectores();
+}
+
+function onPointerDownVec(evt) {
+    if ([4, 5, 6].includes(vecState.paso)) return;
+    evt.preventDefault();
+    const pos = obtenerCoordenadasEnterasCanvas(evt);
+    ocultarMensajeVector();
+
+    if (vecState.drawMode === 'idle') {
+        vecState.draft = null;
+        vecState.tempStart = pos;
+        vecState.tempEnd = pos;
+        vecState.drawMode = 'stretching';
+    } else if (vecState.drawMode === 'stretching') {
+        if (pos.x === vecState.tempStart.x && pos.y === vecState.tempStart.y) {
+            mostrarMensajeVector("Mueve el cursor a otra intersección entera antes de hacer el segundo clic para darle longitud al vector.", "error");
+            return;
+        }
+        vecState.draft = {
+            x1: vecState.tempStart.x,
+            y1: vecState.tempStart.y,
+            x2: pos.x,
+            y2: pos.y
+        };
+        vecState.drawMode = 'idle';
+        vecState.tempStart = null;
+        vecState.tempEnd = null;
+    }
+    dibujarEscenarioVectores();
+}
+
+function limpiarTrazoVector() {
+    vecState.drawMode = 'idle';
+    vecState.tempStart = null;
+    vecState.tempEnd = null;
+    vecState.draft = null;
+    ocultarMensajeVector();
+    dibujarEscenarioVectores();
+}
+
+function dibujarEscenarioVectores() {
+    if (!ctxVec) return;
+    ctxVec.clearRect(0, 0, 400, 400);
+    const isDark = document.documentElement.classList.contains('dark');
+
+    // 1. Cuadrícula (-10 a 10)
+    ctxVec.strokeStyle = isDark ? '#334155' : '#e2e8f0';
+    ctxVec.lineWidth = 1;
+    for (let i = 0; i <= 400; i += vecScale) {
+        ctxVec.beginPath(); ctxVec.moveTo(i, 0); ctxVec.lineTo(i, 400); ctxVec.stroke();
+        ctxVec.beginPath(); ctxVec.moveTo(0, i); ctxVec.lineTo(400, i); ctxVec.stroke();
+    }
+
+    // 2. Ejes principales y flechas
+    const axisColor = isDark ? '#94a3b8' : '#64748b';
+    ctxVec.strokeStyle = axisColor;
+    ctxVec.fillStyle = axisColor;
+    ctxVec.lineWidth = 2;
+
+    ctxVec.beginPath(); ctxVec.moveTo(200, 10); ctxVec.lineTo(200, 390); ctxVec.stroke();
+    ctxVec.beginPath(); ctxVec.moveTo(10, 200); ctxVec.lineTo(390, 200); ctxVec.stroke();
+
+    const arr = 6;
+    ctxVec.beginPath(); ctxVec.moveTo(200, 0); ctxVec.lineTo(200 - arr, arr * 2); ctxVec.lineTo(200 + arr, arr * 2); ctxVec.fill();
+    ctxVec.beginPath(); ctxVec.moveTo(200, 400); ctxVec.lineTo(200 - arr, 400 - arr * 2); ctxVec.lineTo(200 + arr, 400 - arr * 2); ctxVec.fill();
+    ctxVec.beginPath(); ctxVec.moveTo(400, 200); ctxVec.lineTo(400 - arr * 2, 200 - arr); ctxVec.lineTo(400 - arr * 2, 200 + arr); ctxVec.fill();
+    ctxVec.beginPath(); ctxVec.moveTo(0, 200); ctxVec.lineTo(arr * 2, 200 - arr); ctxVec.lineTo(arr * 2, 200 + arr); ctxVec.fill();
+
+    // 3. Numeración de 1 en 1 (-9 a 9)
+    ctxVec.font = 'bold 9px Inter, sans-serif';
+    ctxVec.textAlign = 'center';
+    ctxVec.textBaseline = 'middle';
+    for (let i = -9; i <= 9; i += 1) {
+        if (i === 0) continue;
+        ctxVec.fillText(i, vecOffset + i * vecScale, vecOffset + 13);
+        ctxVec.fillText(i, vecOffset - 13, vecOffset - i * vecScale);
+    }
+
+    // 4. Guía visual de punto de anclaje obligatorio en Paso 2 y Paso 3
+    if (vecState.paso === 2 && vecState.vecU) {
+        dibujarPuntoGuia(vecState.vecU.x2, vecState.vecU.y2, '#a855f7');
+    } else if (vecState.paso === 3 && vecState.vecU && vecState.vecV) {
+        dibujarPuntoGuia(vecState.vecU.x1, vecState.vecU.y1, '#10b981');
+    }
+
+    // 4.5. Apoyo visual del triángulo rectángulo en el Paso 5 (Cálculo del módulo)
+    if (vecState.paso >= 5 && vecState.vecR) {
+        const { x1, y1, x2, y2 } = vecState.vecR;
+        if (x1 !== x2 && y1 !== y2) {
+            const px1 = vecOffset + x1 * vecScale;
+            const py1 = vecOffset - y1 * vecScale;
+            const px2 = vecOffset + x2 * vecScale;
+            const py2 = vecOffset - y2 * vecScale;
+
+            ctxVec.save();
+            ctxVec.beginPath();
+            ctxVec.setLineDash([4, 4]);
+            ctxVec.strokeStyle = '#f59e0b';
+            ctxVec.lineWidth = 2;
+            ctxVec.moveTo(px1, py1);
+            ctxVec.lineTo(px2, py1);
+            ctxVec.lineTo(px2, py2);
+            ctxVec.stroke();
+            ctxVec.restore();
+
+            // Marca de ángulo recto (90°)
+            const dirX = x2 > x1 ? -7 : 7;
+            const dirY = y2 > y1 ? -7 : 7;
+            ctxVec.strokeStyle = '#f59e0b';
+            ctxVec.lineWidth = 1.5;
+            ctxVec.strokeRect(px2, py1, dirX, dirY);
+        }
+    }
+
+    // 5. Vectores ya validados
+    if (vecState.vecU) dibujarFlechaVector(vecState.vecU.x1, vecState.vecU.y1, vecState.vecU.x2, vecState.vecU.y2, '#2563eb', 'u', false);
+    if (vecState.vecV) dibujarFlechaVector(vecState.vecV.x1, vecState.vecV.y1, vecState.vecV.x2, vecState.vecV.y2, '#9333ea', 'v', false);
+    if (vecState.vecR) dibujarFlechaVector(vecState.vecR.x1, vecState.vecR.y1, vecState.vecR.x2, vecState.vecR.y2, '#059669', 'u + v', false);
+
+    // 6. Trazo en progreso (estirándose) o borrador fijado
+    const colorActivo = vecState.paso === 1 ? '#0284c7' : (vecState.paso === 2 ? '#9333ea' : '#059669');
+    const etiquetaActiva = vecState.paso === 1 ? 'u' : (vecState.paso === 2 ? 'v' : 'u + v');
+
+    if (vecState.drawMode === 'stretching' && vecState.tempStart && vecState.tempEnd) {
+        dibujarPuntoAncla(vecState.tempStart.x, vecState.tempStart.y, colorActivo);
+        if (vecState.tempStart.x !== vecState.tempEnd.x || vecState.tempStart.y !== vecState.tempEnd.y) {
+            dibujarFlechaVector(vecState.tempStart.x, vecState.tempStart.y, vecState.tempEnd.x, vecState.tempEnd.y, colorActivo, etiquetaActiva, true);
+        }
+    } else if (vecState.draft) {
+        dibujarFlechaVector(vecState.draft.x1, vecState.draft.y1, vecState.draft.x2, vecState.draft.y2, colorActivo, etiquetaActiva, false);
+    }
+
+    // 7. Imán visual en la intersección entera bajo el cursor
+    if (vecState.hover && ![4, 5, 6].includes(vecState.paso)) {
+        const hx = vecOffset + vecState.hover.x * vecScale;
+        const hy = vecOffset - vecState.hover.y * vecScale;
+        ctxVec.beginPath();
+        ctxVec.arc(hx, hy, 5, 0, Math.PI * 2);
+        ctxVec.fillStyle = 'rgba(6, 182, 212, 0.35)';
+        ctxVec.fill();
+        ctxVec.strokeStyle = '#0891b2';
+        ctxVec.lineWidth = 1.5;
+        ctxVec.stroke();
+    }
+}
+
+function dibujarPuntoAncla(gx, gy, color) {
+    const px = vecOffset + gx * vecScale;
+    const py = vecOffset - gy * vecScale;
+    ctxVec.beginPath();
+    ctxVec.arc(px, py, 5, 0, Math.PI * 2);
+    ctxVec.fillStyle = color;
+    ctxVec.fill();
+    ctxVec.strokeStyle = '#ffffff';
+    ctxVec.lineWidth = 1.5;
+    ctxVec.stroke();
+}
+
+function dibujarPuntoGuia(gx, gy, color) {
+    const px = vecOffset + gx * vecScale;
+    const py = vecOffset - gy * vecScale;
+    ctxVec.beginPath();
+    ctxVec.arc(px, py, 9, 0, Math.PI * 2);
+    ctxVec.strokeStyle = color;
+    ctxVec.lineWidth = 2;
+    ctxVec.setLineDash([3, 3]);
+    ctxVec.stroke();
+    ctxVec.setLineDash([]);
+}
+
+function dibujarFlechaVector(x1, y1, x2, y2, color, etiqueta, punteado) {
+    const px1 = vecOffset + x1 * vecScale;
+    const py1 = vecOffset - y1 * vecScale;
+    const px2 = vecOffset + x2 * vecScale;
+    const py2 = vecOffset - y2 * vecScale;
+
+    const angulo = Math.atan2(py2 - py1, px2 - px1);
+    const largoPunta = 11;
+
+    ctxVec.save();
+    ctxVec.beginPath();
+    if (punteado) ctxVec.setLineDash([5, 4]);
+    ctxVec.moveTo(px1, py1);
+    ctxVec.lineTo(px2 - (largoPunta - 3) * Math.cos(angulo), py2 - (largoPunta - 3) * Math.sin(angulo));
+    ctxVec.strokeStyle = color;
+    ctxVec.lineWidth = 3;
+    ctxVec.stroke();
+    ctxVec.restore();
+
+    ctxVec.beginPath();
+    ctxVec.moveTo(px2, py2);
+    ctxVec.lineTo(px2 - largoPunta * Math.cos(angulo - Math.PI / 6), py2 - largoPunta * Math.sin(angulo - Math.PI / 6));
+    ctxVec.lineTo(px2 - largoPunta * Math.cos(angulo + Math.PI / 6), py2 - largoPunta * Math.sin(angulo + Math.PI / 6));
+    ctxVec.closePath();
+    ctxVec.fillStyle = color;
+    ctxVec.fill();
+
+    dibujarPuntoAncla(x1, y1, color);
+
+    if (etiqueta) {
+        const mx = (px1 + px2) / 2 - 12 * Math.sin(angulo);
+        const my = (py1 + py2) / 2 + 12 * Math.cos(angulo);
+        ctxVec.font = 'bold 12px Inter, sans-serif';
+        ctxVec.fillStyle = color;
+        ctxVec.textAlign = 'center';
+        ctxVec.textBaseline = 'middle';
+        ctxVec.fillText(etiqueta, mx, my);
+    }
+}
+
+function parsearExpresionModulo(raw) {
+    if (!raw) return NaN;
+    let s = raw.trim().toLowerCase().replace(/,/g, '.').replace(/\s+/g, '');
+    s = s.replace(/sqrt\(([^)]+)\)/g, '√($1)');
+    s = s.replace(/sqrt(\d+(\.\d+)?)/g, '√$1');
+
+    if (/^\d+(\.\d+)?$/.test(s)) {
+        return parseFloat(s);
+    }
+    const match = s.match(/^(\d+(?:\.\d+)?)?\*?√\(?(\d+(?:\.\d+)?)\)?$/);
+    if (match) {
+        const coef = match[1] ? parseFloat(match[1]) : 1;
+        const rad = parseFloat(match[2]);
+        return coef * Math.sqrt(rad);
+    }
+    return NaN;
+}
+
+function validarPasoVector() {
+    // PASO 1: Validar vector u en cualquier posición del plano
+    if (vecState.paso === 1) {
+        if (!vecState.draft) {
+            mostrarMensajeVector("Primero dibuja el vector u en el plano (clic en el inicio y clic en el final).", "error");
+            return;
+        }
+        const dx = vecState.draft.x2 - vecState.draft.x1;
+        const dy = vecState.draft.y2 - vecState.draft.y1;
+
+        if (dx === vecState.u.x && dy === vecState.u.y) {
+            vecState.vecU = { ...vecState.draft };
+            vecState.draft = null;
+            generarVectorVCompatible({ x: vecState.vecU.x2, y: vecState.vecU.y2 });
+            vecState.paso = 2;
+            actualizarInterfazPasoVector();
+            dibujarEscenarioVectores();
+            mostrarMensajeVector(`¡Correcto! Ubicaste u = (${vecState.u.x}, ${vecState.u.y}). Ahora grafica el vector v desde la punta de u.`, "exito");
+        } else {
+            mostrarMensajeVector(`El desplazamiento dibujado es (${dx}, ${dy}), pero se pidió u = (${vecState.u.x}, ${vecState.u.y}). Ajusta el trazo e inténtalo nuevamente.`, "error");
+        }
+        return;
+    }
+
+    // PASO 2: Validar vector v partiendo desde la punta de u
+    if (vecState.paso === 2) {
+        if (!vecState.draft) {
+            mostrarMensajeVector("Dibuja el vector v comenzando exactamente en la punta de flecha de u.", "error");
+            return;
+        }
+        const inicioCorrecto = (vecState.draft.x1 === vecState.vecU.x2 && vecState.draft.y1 === vecState.vecU.y2);
+        const dx = vecState.draft.x2 - vecState.draft.x1;
+        const dy = vecState.draft.y2 - vecState.draft.y1;
+        const componentesCorrectas = (dx === vecState.v.x && dy === vecState.v.y);
+
+        if (!inicioCorrecto) {
+            mostrarMensajeVector(`Para aplicar el método punta y cola, el vector v debe iniciar exactamente en (${vecState.vecU.x2}, ${vecState.vecU.y2}), donde termina u.`, "error");
+            return;
+        }
+        if (!componentesCorrectas) {
+            mostrarMensajeVector(`El inicio es correcto, pero trazaste un desplazamiento (${dx}, ${dy}) en lugar de v = (${vecState.v.x}, ${vecState.v.y}).`, "error");
+            return;
+        }
+
+        vecState.vecV = { ...vecState.draft };
+        vecState.draft = null;
+        vecState.paso = 3;
+        actualizarInterfazPasoVector();
+        dibujarEscenarioVectores();
+        mostrarMensajeVector("¡Excelente! Ahora traza gráficamente el vector resultante (u + v) desde el inicio de u hasta la punta de v.", "exito");
+        return;
+    }
+
+    // PASO 3: Validar representación gráfica del vector resultante
+    if (vecState.paso === 3) {
+        if (!vecState.draft) {
+            mostrarMensajeVector("Traza el vector resultante desde el inicio de u hasta la punta de v.", "error");
+            return;
+        }
+        const inicioOk = (vecState.draft.x1 === vecState.vecU.x1 && vecState.draft.y1 === vecState.vecU.y1);
+        const finOk = (vecState.draft.x2 === vecState.vecV.x2 && vecState.draft.y2 === vecState.vecV.y2);
+
+        if (inicioOk && finOk) {
+            vecState.vecR = { ...vecState.draft };
+            vecState.draft = null;
+            vecState.paso = 4;
+            actualizarInterfazPasoVector();
+            dibujarEscenarioVectores();
+            mostrarMensajeVector("¡Muy bien! Ahora escribe las componentes del vector resultante (u + v) que acabas de dibujar.", "exito");
+        } else {
+            mostrarMensajeVector(`El vector resultante debe nacer en el inicio de u (${vecState.vecU.x1}, ${vecState.vecU.y1}) y terminar en la punta de v (${vecState.vecV.x2}, ${vecState.vecV.y2}).`, "error");
+        }
+        return;
+    }
+
+    // PASO 4: Validar componentes algebraicas de (u + v)
+    if (vecState.paso === 4) {
+        const rxVal = parseInt(document.getElementById('vec-input-rx').value, 10);
+        const ryVal = parseInt(document.getElementById('vec-input-ry').value, 10);
+
+        if (isNaN(rxVal) || isNaN(ryVal)) {
+            mostrarMensajeVector("Completa ambas coordenadas (x, y) del vector resultante.", "error");
+            return;
+        }
+
+        const esperadoX = vecState.u.x + vecState.v.x;
+        const esperadoY = vecState.u.y + vecState.v.y;
+
+        if (rxVal === esperadoX && ryVal === esperadoY) {
+            vecState.paso = 5;
+            actualizarInterfazPasoVector();
+            dibujarEscenarioVectores();
+            mostrarMensajeVector(`¡Exacto! u + v = (${esperadoX}, ${esperadoY}). Como último paso, calcula su módulo.`, "exito");
+        } else {
+            mostrarMensajeVector(`Observa el desplazamiento neto del vector verde en el plano o suma componente a componente: (${vecState.u.x} + ${vecState.v.x}, ${vecState.u.y} + ${vecState.v.y}).`, "error");
+        }
+        return;
+    }
+
+    // PASO 5: Validar el módulo del vector resultante
+    if (vecState.paso === 5) {
+        const rawMod = document.getElementById('vec-input-modulo').value;
+        const valUsuario = parsearExpresionModulo(rawMod);
+
+        if (isNaN(valUsuario)) {
+            mostrarMensajeVector("Ingresa un valor numérico o una expresión con raíz válida (por ejemplo: √29 o 5).", "error");
+            return;
+        }
+
+        const rx = vecState.u.x + vecState.v.x;
+        const ry = vecState.u.y + vecState.v.y;
+        const radicando = rx * rx + ry * ry;
+        const esperado = Math.sqrt(radicando);
+
+        if (Math.abs(valUsuario - esperado) < 0.015) {
+            vecState.paso = 6;
+            actualizarInterfazPasoVector();
+            dibujarEscenarioVectores();
+
+            if (typeof userStats !== 'undefined') {
+                userStats.xp += 30;
+                if (typeof updateStatsUI === 'function') updateStatsUI();
+            }
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 120, spread: 75, origin: { y: 0.6 } });
+            }
+            const textoExacto = Number.isInteger(esperado) ? `${esperado}` : `√${radicando}`;
+            mostrarMensajeVector(`¡Excelente trabajo! El módulo del vector resultante es ‖u + v‖ = ${textoExacto}. Has completado todo el desafío.`, "exito");
+        } else {
+            mostrarMensajeVector("Observa el triángulo rectángulo que se forma con el vector resultante, aplica el Teorema de Pitágoras para calcular su módulo.", "error");
+        }
+    }
+}
+
+function actualizarInterfazPasoVector() {
+    const badge = document.getElementById('vec-paso-badge');
+    const titulo = document.getElementById('vec-instruccion-titulo');
+    const detalle = document.getElementById('vec-instruccion-detalle');
+    const datoU = document.getElementById('vec-dato-u');
+    const datoV = document.getElementById('vec-dato-v');
+    const panelComp = document.getElementById('vec-panel-componentes');
+    const rxInput = document.getElementById('vec-input-rx');
+    const ryInput = document.getElementById('vec-input-ry');
+    const panelMod = document.getElementById('vec-panel-modulo');
+    const modInput = document.getElementById('vec-input-modulo');
+    const btnValidar = document.getElementById('btn-validar-vector');
+    const btnTexto = document.getElementById('btn-validar-vector-texto');
+    const btnBorrar = document.getElementById('btn-limpiar-trazo');
+
+    datoU.innerText = `u = (${vecState.u.x}, ${vecState.u.y})`;
+    datoV.innerText = `v = (${vecState.v.x}, ${vecState.v.y})`;
+
+    // Actualizar pestañas superiores (1 a 5)
+    for (let i = 1; i <= 5; i++) {
+        const tab = document.getElementById(`vec-tab-${i}`);
+        if (!tab) continue;
+        const spanCol = i === 5 ? "col-span-2 sm:col-span-1 " : "";
+        if (i < vecState.paso) {
+            tab.className = `${spanCol}p-2.5 rounded-xl border-2 border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/20 text-center transition`;
+            tab.querySelector('div:first-child').className = "text-[10px] font-bold text-emerald-600 dark:text-emerald-300 uppercase";
+            tab.querySelector('div:first-child').innerHTML = `<i class="fa-solid fa-check"></i> Paso ${i}`;
+        } else if (i === vecState.paso) {
+            tab.className = `${spanCol}p-2.5 rounded-xl border-2 border-cyan-500 bg-cyan-50/50 dark:bg-cyan-900/20 text-center transition`;
+            tab.querySelector('div:first-child').className = "text-[10px] font-bold text-cyan-600 dark:text-cyan-300 uppercase";
+            tab.querySelector('div:first-child').innerText = `Paso ${i}`;
+        } else {
+            tab.className = `${spanCol}p-2.5 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-center transition opacity-60`;
+            tab.querySelector('div:first-child').className = "text-[10px] font-bold text-slate-400 uppercase";
+            tab.querySelector('div:first-child').innerText = `Paso ${i}`;
+        }
+    }
+
+    // Visibilidad y estado de bandeja de componentes (visible desde Paso 4 en adelante)
+    if (vecState.paso < 4) {
+        panelComp.classList.add('hidden');
+        if (rxInput) rxInput.disabled = false;
+        if (ryInput) ryInput.disabled = false;
+    } else if (vecState.paso === 4) {
+        panelComp.classList.remove('hidden');
+        panelComp.className = "bg-amber-50 dark:bg-amber-900/20 p-5 rounded-xl border border-amber-200 dark:border-amber-700/50 space-y-3";
+        if (rxInput) rxInput.disabled = false;
+        if (ryInput) ryInput.disabled = false;
+    } else {
+        // Paso 5 y 6: Permanece visible y bloqueada como referencia
+        panelComp.classList.remove('hidden');
+        panelComp.className = "bg-emerald-50/70 dark:bg-emerald-900/20 p-4 rounded-xl border border-emerald-300 dark:border-emerald-700/60 space-y-2";
+        if (rxInput) rxInput.disabled = true;
+        if (ryInput) ryInput.disabled = true;
+    }
+
+    // Visibilidad y estado de bandeja de módulo (visible desde Paso 5 en adelante, debajo de componentes)
+    if (panelMod) {
+        if (vecState.paso < 5) {
+            panelMod.classList.add('hidden');
+            if (modInput) modInput.disabled = false;
+        } else if (vecState.paso === 5) {
+            panelMod.classList.remove('hidden');
+            panelMod.className = "bg-amber-50 dark:bg-amber-900/20 p-5 rounded-xl border border-amber-200 dark:border-amber-700/50 space-y-3";
+            if (modInput) { modInput.disabled = false; modInput.focus(); }
+        } else {
+            panelMod.classList.remove('hidden');
+            panelMod.className = "bg-emerald-50/70 dark:bg-emerald-900/20 p-4 rounded-xl border border-emerald-300 dark:border-emerald-700/60 space-y-2";
+            if (modInput) modInput.disabled = true;
+        }
+    }
+
+    btnValidar.classList.remove('hidden');
+    btnBorrar.classList.remove('hidden');
+
+    if (vecState.paso === 1) {
+        badge.innerText = "Paso 1 de 5";
+        titulo.innerText = "Grafica el primer vector (u)";
+        detalle.innerText = "Marca un punto de inicio en cualquier intersección entera del plano y estira el vector según sus componentes.";
+        datoV.classList.add('hidden');
+        btnTexto.innerText = "Comprobar Vector u";
+    } else if (vecState.paso === 2) {
+        badge.innerText = "Paso 2 de 5";
+        titulo.innerText = "Grafica el segundo vector (v)";
+        detalle.innerHTML = `Haz clic en la punta de flecha de <strong>u</strong> en <strong>(${vecState.vecU.x2}, ${vecState.vecU.y2})</strong> y traza el vector <strong>v</strong>.`;
+        datoV.classList.remove('hidden');
+        btnTexto.innerText = "Comprobar Vector v";
+    } else if (vecState.paso === 3) {
+        badge.innerText = "Paso 3 de 5";
+        titulo.innerText = "Representa el vector resultante (u + v)";
+        detalle.innerHTML = `Une el <strong>inicio de u (${vecState.vecU.x1}, ${vecState.vecU.y1})</strong> con el <strong>final de v (${vecState.vecV.x2}, ${vecState.vecV.y2})</strong>.`;
+        datoV.classList.remove('hidden');
+        btnTexto.innerText = "Comprobar Resultante";
+    } else if (vecState.paso === 4) {
+        badge.innerText = "Paso 4 de 5";
+        titulo.innerText = "Determina las componentes de u + v";
+        detalle.innerText = "Observa el vector resultante verde que trazaste e indica sus componentes horizontal y vertical.";
+        datoV.classList.remove('hidden');
+        btnBorrar.classList.add('hidden');
+        btnTexto.innerText = "Comprobar Componentes";
+    } else if (vecState.paso === 5) {
+        badge.innerText = "Paso 5 de 5";
+        titulo.innerText = "Calcula el módulo del vector resultante";
+        detalle.innerText = "Determina la longitud de u + v usando sus componentes y el triángulo rectángulo formado en el plano.";
+        datoV.classList.remove('hidden');
+        btnBorrar.classList.add('hidden');
+        btnTexto.innerText = "Comprobar Módulo";
+    } else {
+        badge.innerText = "Completado";
+        titulo.innerText = "¡Desafío resuelto!";
+        detalle.innerText = "Has completado la suma gráfica, sus componentes y su módulo. Presiona 'Nuevo Ejercicio' para seguir practicando.";
+        datoV.classList.remove('hidden');
+        btnValidar.classList.add('hidden');
+        btnBorrar.classList.add('hidden');
+    }
+}
+
+function mostrarMensajeVector(texto, tipo) {
+    const msgDiv = document.getElementById('mensaje-vectores');
+    msgDiv.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-700', 'border-emerald-300', 'bg-rose-100', 'text-rose-700', 'border-rose-300');
+    if (tipo === 'exito') {
+        msgDiv.classList.add('bg-emerald-100', 'text-emerald-700', 'border', 'border-emerald-300');
+        msgDiv.innerHTML = `<i class="fa-solid fa-circle-check text-lg mt-0.5"></i> <span>${texto}</span>`;
+    } else {
+        msgDiv.classList.add('bg-rose-100', 'text-rose-700', 'border', 'border-rose-300');
+        msgDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-lg mt-0.5"></i> <span>${texto}</span>`;
+    }
+}
+
+function ocultarMensajeVector() {
+    const msgDiv = document.getElementById('mensaje-vectores');
+    if (msgDiv) msgDiv.classList.add('hidden');
+}
+        
     </script>
 </body>
 </html>
