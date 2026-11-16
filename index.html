@@ -1378,197 +1378,266 @@ const bancoPorBloque = {
 };
 
 let evalEstado = {
-    nombre: "",
-    nombreId: "",
-    preguntaActual: 0,
-    respuestasUsuario: [],
-    preguntasMezcladas: []
-};
+            enCurso: false,
+            nombre: "",
+            nombreId: "",
+            preguntaActual: 0,
+            respuestasUsuario: [],
+            preguntasMezcladas: []
+        };
 
-function obtenerConexionFirebase() {
-    if (typeof firebase === 'undefined') return null;
-    if (!firebase.apps.length) {
-        firebase.initializeApp({
-            apiKey: "AIzaSyDaUTz3BnaH9pv_JqVgOzrn8c-ouNeuQGM",
-            authDomain: "mathquest-6d058.firebaseapp.com",
-            databaseURL: "https://mathquest-6d058-default-rtdb.firebaseio.com",
-            projectId: "mathquest-6d058",
-            storageBucket: "mathquest-6d058.firebasestorage.app",
-            messagingSenderId: "23144771622",
-            appId: "1:23144771622:web:18c5f496e93efdeaac36e7"
-        });
-    }
-    return firebase.database();
-}
-
-function seleccionarAleatorias(lista, cantidad) {
-    return [...lista].sort(() => 0.5 - Math.random()).slice(0, cantidad);
-}
-
-function generarPrueba7Preguntas() {
-    const p1 = seleccionarAleatorias(bancoPorBloque.raicesPotenciasLog, 1);
-    const p2y3 = seleccionarAleatorias(bancoPorBloque.funcionCuadratica, 2);
-    const p4 = seleccionarAleatorias(bancoPorBloque.esferaCilindro, 1);
-    const p5 = seleccionarAleatorias(bancoPorBloque.trigonometria, 1);
-    const p6 = seleccionarAleatorias(bancoPorBloque.vectores, 1);
-    const p7 = seleccionarAleatorias(bancoPorBloque.probabilidadConteo, 1);
-    return [...p1, ...p2y3, ...p4, ...p5, ...p6, ...p7];
-}
-
-function initEvaluacion() {
-    document.getElementById('eval-nombre-input').value = "";
-    document.getElementById('eval-pantalla-ingreso').classList.remove('hidden');
-    document.getElementById('eval-pantalla-preguntas').classList.add('hidden');
-    document.getElementById('eval-pantalla-resultados').classList.add('hidden');
-    evalEstado.preguntaActual = 0;
-    evalEstado.respuestasUsuario = [];
-}
-
-function comenzarEvaluacion() {
-    const nombre = document.getElementById('eval-nombre-input').value.trim();
-    if (!nombre) return alert("Por favor, ingresa tu nombre.");
-    
-    evalEstado.nombre = nombre;
-    evalEstado.nombreId = nombre.replace(/[.#$\[\]]/g, "_");
-    evalEstado.preguntasMezcladas = generarPrueba7Preguntas();
-
-    document.getElementById('eval-pantalla-ingreso').classList.add('hidden');
-    document.getElementById('eval-pantalla-preguntas').classList.remove('hidden');
-    mostrarPregunta();
-
-    const database = obtenerConexionFirebase();
-    if (database) {
-        database.ref('evaluaciones/' + evalEstado.nombreId).set({
-            nombre: evalEstado.nombre,
-            estado: "En curso",
-            preguntaActual: 1,
-            totalPreguntas: TOTAL_PREGUNTAS_EVAL,
-            puntaje: 0,
-            ultimaActualizacion: new Date().toLocaleTimeString()
-        }).catch(err => alert("Error de Firebase al guardar: " + err.message));
-    }
-}
-
-function mostrarPregunta() {
-    const p = evalEstado.preguntasMezcladas[evalEstado.preguntaActual];
-    
-    document.getElementById('eval-contador').innerText = `Pregunta ${evalEstado.preguntaActual + 1} de ${TOTAL_PREGUNTAS_EVAL}`;
-    document.getElementById('eval-eje-etiqueta').innerText = `Eje: ${p.eje}`;
-    document.getElementById('eval-progreso-barra').style.width = `${((evalEstado.preguntaActual + 1) / TOTAL_PREGUNTAS_EVAL) * 100}%`;
-    
-    const preguntaEl = document.getElementById('eval-pregunta-texto');
-    preguntaEl.innerText = p.texto;
-
-    // Renderizar gráfico SVG si la pregunta incluye uno
-    let graficoBox = document.getElementById('eval-grafico-box');
-    if (!graficoBox) {
-        graficoBox = document.createElement('div');
-        graficoBox.id = 'eval-grafico-box';
-        preguntaEl.insertAdjacentElement('afterend', graficoBox);
-    }
-    if (p.grafico) {
-        graficoBox.innerHTML = p.grafico;
-        graficoBox.className = "mb-5 flex justify-center";
-    } else {
-        graficoBox.innerHTML = "";
-        graficoBox.className = "hidden";
-    }
-
-    const opcionesDiv = document.getElementById('eval-opciones');
-    opcionesDiv.innerHTML = '';
-
-    // Mezclar opciones de respuesta
-    let opcionesConIndex = p.opciones.map((txt, index) => ({txt, index}));
-    opcionesConIndex.sort(() => 0.5 - Math.random());
-
-    opcionesConIndex.forEach(op => {
-        const btn = document.createElement('button');
-        btn.className = "w-full text-left p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-all font-medium text-slate-700 dark:text-slate-200";
-        btn.innerText = op.txt;
-        btn.onclick = () => responderPregunta(op.index === p.correcta, p.eje);
-        opcionesDiv.appendChild(btn);
-    });
-
-    if (evalEstado.preguntaActual > 0) {
-        const database = obtenerConexionFirebase();
-        if (database) {
-            database.ref('evaluaciones/' + evalEstado.nombreId).update({
-                preguntaActual: evalEstado.preguntaActual + 1,
-                ultimaActualizacion: new Date().toLocaleTimeString()
-            }).catch(err => console.error("Error Firebase al actualizar:", err));
-        }
-    }
-}
-
-function responderPregunta(esCorrecta, eje) {
-    evalEstado.respuestasUsuario.push({ eje, esCorrecta });
-    evalEstado.preguntaActual++;
-
-    if (evalEstado.preguntaActual < TOTAL_PREGUNTAS_EVAL) {
-        mostrarPregunta();
-    } else {
-        mostrarResultados();
-    }
-}
-
-function mostrarResultados() {
-    document.getElementById('eval-pantalla-preguntas').classList.add('hidden');
-    document.getElementById('eval-pantalla-resultados').classList.remove('hidden');
-
-    const buenas = evalEstado.respuestasUsuario.filter(r => r.esCorrecta).length;
-    document.getElementById('eval-resultado-puntaje').innerHTML = `Obtuviste <span class="font-bold text-indigo-600 dark:text-indigo-400">${buenas}/${TOTAL_PREGUNTAS_EVAL}</span> respuestas correctas.`;
-
-    const feedbackContainer = document.getElementById('eval-feedback-container');
-    feedbackContainer.innerHTML = '';
-    
-    const analisisEjes = {};
-    evalEstado.respuestasUsuario.forEach(r => {
-        if (!analisisEjes[r.eje]) analisisEjes[r.eje] = { total: 0, buenas: 0 };
-        analisisEjes[r.eje].total++;
-        if (r.esCorrecta) analisisEjes[r.eje].buenas++;
-    });
-
-    for (const [eje, datos] of Object.entries(analisisEjes)) {
-        const porcentaje = datos.buenas / datos.total;
-        let mensaje, icono, color;
-
-        if (porcentaje === 1) {
-            mensaje = "¡Excelente dominio!";
-            icono = "fa-check-circle"; color = "text-teal-500";
-        } else if (porcentaje >= 0.5) {
-            mensaje = "Buen trabajo, pero revisa tus apuntes para consolidar.";
-            icono = "fa-triangle-exclamation"; color = "text-amber-500";
-        } else {
-            mensaje = "Te recomendamos repasar este eje; utiliza el Dashboard para practicar.";
-            icono = "fa-circle-xmark"; color = "text-rose-500";
+        function guardarProgresoEval() {
+            try {
+                if (evalEstado.enCurso) {
+                    localStorage.setItem(EVAL_STORAGE_KEY, JSON.stringify(evalEstado));
+                } else {
+                    localStorage.removeItem(EVAL_STORAGE_KEY);
+                }
+            } catch (e) {
+                console.warn("No se pudo guardar el progreso local de la evaluación:", e);
+            }
         }
 
-        feedbackContainer.innerHTML += `
-            <div class="flex items-start gap-3">
-                <i class="fa-solid ${icono} ${color} mt-1"></i>
-                <div>
-                    <span class="font-bold text-slate-800 dark:text-white block text-sm">${eje} (${datos.buenas}/${datos.total})</span>
-                    <span class="text-xs text-slate-500 dark:text-slate-400">${mensaje}</span>
-                </div>
-            </div>
-        `;
-    }
+        function cargarProgresoEval() {
+            if (evalEstado.enCurso && evalEstado.preguntasMezcladas.length > 0) {
+                return true;
+            }
+            try {
+                const guardado = localStorage.getItem(EVAL_STORAGE_KEY);
+                if (guardado) {
+                    const parsed = JSON.parse(guardado);
+                    if (
+                        parsed &&
+                        parsed.enCurso &&
+                        Array.isArray(parsed.preguntasMezcladas) &&
+                        parsed.preguntasMezcladas.length > 0 &&
+                        parsed.preguntaActual < parsed.preguntasMezcladas.length
+                    ) {
+                        evalEstado = parsed;
+                        return true;
+                    }
+                }
+            } catch (e) {
+                console.warn("No se pudo recuperar el progreso local de la evaluación:", e);
+            }
+            return false;
+        }
 
-    if (buenas === TOTAL_PREGUNTAS_EVAL) {
-        if (typeof confetti !== 'undefined') confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
-    }
+        function obtenerConexionFirebase() {
+            if (typeof firebase === 'undefined') return null;
+            if (!firebase.apps.length) {
+                firebase.initializeApp({
+                    apiKey: "AIzaSyDaUTz3BnaH9pv_JqVgOzrn8c-ouNeuQGM",
+                    authDomain: "mathquest-6d058.firebaseapp.com",
+                    databaseURL: "https://mathquest-6d058-default-rtdb.firebaseio.com",
+                    projectId: "mathquest-6d058",
+                    storageBucket: "mathquest-6d058.firebasestorage.app",
+                    messagingSenderId: "23144771622",
+                    appId: "1:23144771622:web:18c5f496e93efdeaac36e7"
+                });
+            }
+            return firebase.database();
+        }
 
-    const database = obtenerConexionFirebase();
-    if (database) {
-        database.ref('evaluaciones/' + evalEstado.nombreId).update({
-            estado: "Terminado",
-            puntaje: buenas,
-            totalPreguntas: TOTAL_PREGUNTAS_EVAL,
-            ejes: analisisEjes,
-            ultimaActualizacion: new Date().toLocaleTimeString()
-        }).catch(err => console.error("Error Firebase al finalizar:", err));
-    }
-}
+        function seleccionarAleatorias(lista, cantidad) {
+            return [...lista].sort(() => 0.5 - Math.random()).slice(0, cantidad);
+        }
+
+        function generarPrueba7Preguntas() {
+            const p1 = seleccionarAleatorias(bancoPorBloque.raicesPotenciasLog, 1);
+            const p2y3 = seleccionarAleatorias(bancoPorBloque.funcionCuadratica, 2);
+            const p4 = seleccionarAleatorias(bancoPorBloque.esferaCilindro, 1);
+            const p5 = seleccionarAleatorias(bancoPorBloque.trigonometria, 1);
+            const p6 = seleccionarAleatorias(bancoPorBloque.vectores, 1);
+            const p7 = seleccionarAleatorias(bancoPorBloque.probabilidadConteo, 1);
+            return [...p1, ...p2y3, ...p4, ...p5, ...p6, ...p7];
+        }
+
+        function initEvaluacion() {
+            // Si hay una evaluación en curso, retomarla exactamente donde quedó
+            if (cargarProgresoEval()) {
+                document.getElementById('eval-pantalla-ingreso').classList.add('hidden');
+                document.getElementById('eval-pantalla-resultados').classList.add('hidden');
+                document.getElementById('eval-pantalla-preguntas').classList.remove('hidden');
+                mostrarPregunta();
+                return;
+            }
+
+            // Si no hay evaluación activa, preparar pantalla de inicio limpia
+            evalEstado = {
+                enCurso: false,
+                nombre: "",
+                nombreId: "",
+                preguntaActual: 0,
+                respuestasUsuario: [],
+                preguntasMezcladas: []
+            };
+            guardarProgresoEval();
+
+            document.getElementById('eval-nombre-input').value = "";
+            document.getElementById('eval-pantalla-ingreso').classList.remove('hidden');
+            document.getElementById('eval-pantalla-preguntas').classList.add('hidden');
+            document.getElementById('eval-pantalla-resultados').classList.add('hidden');
+        }
+
+        function comenzarEvaluacion() {
+            const nombre = document.getElementById('eval-nombre-input').value.trim();
+            if (!nombre) return alert("Por favor, ingresa tu nombre.");
+            
+            evalEstado = {
+                enCurso: true,
+                nombre: nombre,
+                nombreId: nombre.replace(/[.#$\[\]]/g, "_"),
+                preguntaActual: 0,
+                respuestasUsuario: [],
+                preguntasMezcladas: generarPrueba7Preguntas()
+            };
+            guardarProgresoEval();
+
+            document.getElementById('eval-pantalla-ingreso').classList.add('hidden');
+            document.getElementById('eval-pantalla-preguntas').classList.remove('hidden');
+            mostrarPregunta();
+
+            const database = obtenerConexionFirebase();
+            if (database) {
+                database.ref('evaluaciones/' + evalEstado.nombreId).set({
+                    nombre: evalEstado.nombre,
+                    estado: "En curso",
+                    preguntaActual: 1,
+                    totalPreguntas: TOTAL_PREGUNTAS_EVAL,
+                    puntaje: 0,
+                    ultimaActualizacion: new Date().toLocaleTimeString()
+                }).catch(err => alert("Error de Firebase al guardar: " + err.message));
+            }
+        }
+
+        function mostrarPregunta() {
+            const p = evalEstado.preguntasMezcladas[evalEstado.preguntaActual];
+            if (!p) return;
+            
+            document.getElementById('eval-contador').innerText = `Pregunta ${evalEstado.preguntaActual + 1} de ${TOTAL_PREGUNTAS_EVAL}`;
+            document.getElementById('eval-eje-etiqueta').innerText = `Eje: ${p.eje}`;
+            document.getElementById('eval-progreso-barra').style.width = `${((evalEstado.preguntaActual + 1) / TOTAL_PREGUNTAS_EVAL) * 100}%`;
+            
+            const preguntaEl = document.getElementById('eval-pregunta-texto');
+            preguntaEl.innerText = p.texto;
+
+            // Renderizar gráfico SVG si la pregunta incluye uno
+            let graficoBox = document.getElementById('eval-grafico-box');
+            if (!graficoBox) {
+                graficoBox = document.createElement('div');
+                graficoBox.id = 'eval-grafico-box';
+                preguntaEl.insertAdjacentElement('afterend', graficoBox);
+            }
+            if (p.grafico) {
+                graficoBox.innerHTML = p.grafico;
+                graficoBox.className = "mb-5 flex justify-center";
+            } else {
+                graficoBox.innerHTML = "";
+                graficoBox.className = "hidden";
+            }
+
+            const opcionesDiv = document.getElementById('eval-opciones');
+            opcionesDiv.innerHTML = '';
+
+            // Mezclar opciones de respuesta
+            let opcionesConIndex = p.opciones.map((txt, index) => ({ txt, index }));
+            opcionesConIndex.sort(() => 0.5 - Math.random());
+
+            opcionesConIndex.forEach(op => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-all font-medium text-slate-700 dark:text-slate-200";
+                btn.innerText = op.txt;
+                btn.onclick = () => responderPregunta(op.index === p.correcta, p.eje);
+                opcionesDiv.appendChild(btn);
+            });
+
+            if (evalEstado.preguntaActual > 0) {
+                const database = obtenerConexionFirebase();
+                if (database) {
+                    database.ref('evaluaciones/' + evalEstado.nombreId).update({
+                        preguntaActual: evalEstado.preguntaActual + 1,
+                        ultimaActualizacion: new Date().toLocaleTimeString()
+                    }).catch(err => console.error("Error Firebase al actualizar:", err));
+                }
+            }
+        }
+
+        function responderPregunta(esCorrecta, eje) {
+            evalEstado.respuestasUsuario.push({ eje, esCorrecta });
+            evalEstado.preguntaActual++;
+
+            if (evalEstado.preguntaActual < TOTAL_PREGUNTAS_EVAL) {
+                guardarProgresoEval();
+                mostrarPregunta();
+            } else {
+                evalEstado.enCurso = false;
+                guardarProgresoEval();
+                mostrarResultados();
+            }
+        }
+
+        function mostrarResultados() {
+            evalEstado.enCurso = false;
+            guardarProgresoEval();
+
+            document.getElementById('eval-pantalla-preguntas').classList.add('hidden');
+            document.getElementById('eval-pantalla-resultados').classList.remove('hidden');
+
+            const buenas = evalEstado.respuestasUsuario.filter(r => r.esCorrecta).length;
+            document.getElementById('eval-resultado-puntaje').innerHTML = `Obtuviste <span class="font-bold text-indigo-600 dark:text-indigo-400">${buenas}/${TOTAL_PREGUNTAS_EVAL}</span> respuestas correctas.`;
+
+            const feedbackContainer = document.getElementById('eval-feedback-container');
+            feedbackContainer.innerHTML = '';
+            
+            const analisisEjes = {};
+            evalEstado.respuestasUsuario.forEach(r => {
+                if (!analisisEjes[r.eje]) analisisEjes[r.eje] = { total: 0, buenas: 0 };
+                analisisEjes[r.eje].total++;
+                if (r.esCorrecta) analisisEjes[r.eje].buenas++;
+            });
+
+            for (const [eje, datos] of Object.entries(analisisEjes)) {
+                const porcentaje = datos.buenas / datos.total;
+                let mensaje, icono, color;
+
+                if (porcentaje === 1) {
+                    mensaje = "¡Excelente dominio!";
+                    icono = "fa-check-circle"; color = "text-teal-500";
+                } else if (porcentaje >= 0.5) {
+                    mensaje = "Buen trabajo, pero revisa tus apuntes para consolidar.";
+                    icono = "fa-triangle-exclamation"; color = "text-amber-500";
+                } else {
+                    mensaje = "Te recomendamos repasar este eje; utiliza el Dashboard para practicar.";
+                    icono = "fa-circle-xmark"; color = "text-rose-500";
+                }
+
+                feedbackContainer.innerHTML += `
+                    <div class="flex items-start gap-3">
+                        <i class="fa-solid ${icono} ${color} mt-1"></i>
+                        <div>
+                            <span class="font-bold text-slate-800 dark:text-white block text-sm">${eje} (${datos.buenas}/${datos.total})</span>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">${mensaje}</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (buenas === TOTAL_PREGUNTAS_EVAL) {
+                if (typeof confetti !== 'undefined') confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
+            }
+
+            const database = obtenerConexionFirebase();
+            if (database) {
+                database.ref('evaluaciones/' + evalEstado.nombreId).update({
+                    estado: "Terminado",
+                    puntaje: buenas,
+                    totalPreguntas: TOTAL_PREGUNTAS_EVAL,
+                    ejes: analisisEjes,
+                    ultimaActualizacion: new Date().toLocaleTimeString()
+                }).catch(err => console.error("Error Firebase al finalizar:", err));
+            }
+        }
 
 // 1. ESTRUCTURA DE CONTENIDOS Y SUB-EJES
 const estructuraSimce = {
@@ -4025,184 +4094,245 @@ function comprobarOrdenRecta() {
 }
         
 // --- SECTION 7: LÓGICA DEL GRÁFICO A LA EXPRESIÓN ---
-let targetH = 0;
-let targetK = 0;
-let targetA = 1; // 1 si abre hacia arriba, -1 si abre hacia abajo
+        let targetH = 0;
+        let targetK = 0;
+        let targetA = 1; // 1 si abre hacia arriba, -1 si abre hacia abajo
 
-function initGraficoExpresion() {
-    // Generar traslaciones aleatorias entre -8 y 8
-    targetH = Math.floor(Math.random() * 17) - 8;
-    targetK = Math.floor(Math.random() * 17) - 8;
-    
-    // Decidir aleatoriamente la concavidad (50% de probabilidad para cada una)
-    targetA = Math.random() < 0.5 ? 1 : -1; 
-    
-    document.getElementById('input-expresion').value = '';
-    const msgDiv = document.getElementById('mensaje-grafico');
-    msgDiv.classList.add('hidden');
-    msgDiv.className = 'hidden p-4 rounded-xl font-medium text-sm flex items-center gap-2'; // Reset
-    
-    const canvas = document.getElementById('canvas-grafico');
-    if(canvas) {
-        const ctx = canvas.getContext('2d');
-        dibujarEscenario(ctx);
-    }
-}
+        function initGraficoExpresion() {
+            // Generar traslaciones aleatorias entre -8 y 8
+            targetH = Math.floor(Math.random() * 17) - 8;
+            targetK = Math.floor(Math.random() * 17) - 8;
+            
+            // Decidir aleatoriamente la concavidad (50% de probabilidad para cada una)
+            targetA = Math.random() < 0.5 ? 1 : -1; 
+            
+            const input = document.getElementById('input-expresion');
+            if (input) input.value = '';
 
-function dibujarEscenario(ctx) {
-    ctx.clearRect(0, 0, 400, 400);
-    const isDark = document.documentElement.classList.contains('dark');
-    
-    // Cuadrícula (-10 a 10) -> Cada unidad son 20 pixeles
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = isDark ? '#334155' : '#e2e8f0';
-    for(let i = -10; i <= 10; i++) {
-        ctx.beginPath(); ctx.moveTo(0, 200 - i*20); ctx.lineTo(400, 200 - i*20); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(200 + i*20, 0); ctx.lineTo(200 + i*20, 400); ctx.stroke();
-    }
-    
-    // Ejes X e Y con puntas de flecha
-    ctx.strokeStyle = isDark ? '#94a3b8' : '#64748b';
-    ctx.lineWidth = 2;
-    ctx.beginPath(); 
-    
-    // Línea Eje X
-    ctx.moveTo(0, 200); ctx.lineTo(400, 200); 
-    // Flechas Eje X (Derecha e Izquierda)
-    ctx.moveTo(400, 200); ctx.lineTo(390, 195);
-    ctx.moveTo(400, 200); ctx.lineTo(390, 205);
-    ctx.moveTo(0, 200); ctx.lineTo(10, 195);
-    ctx.moveTo(0, 200); ctx.lineTo(10, 205);
-
-    // Línea Eje Y
-    ctx.moveTo(200, 0); ctx.lineTo(200, 400); 
-    // Flechas Eje Y (Arriba y Abajo)
-    ctx.moveTo(200, 0); ctx.lineTo(195, 10);
-    ctx.moveTo(200, 0); ctx.lineTo(205, 10);
-    ctx.moveTo(200, 400); ctx.lineTo(195, 390);
-    ctx.moveTo(200, 400); ctx.lineTo(205, 390);
-    
-    ctx.stroke();
-
-    // NÚMEROS EN LOS EJES (Graduación de 2 en 2)
-    ctx.fillStyle = isDark ? '#cbd5e1' : '#475569';
-    ctx.font = 'bold 10px Inter, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    
-    for(let i = -10; i <= 10; i += 2) {
-        if(i === 0) continue; 
-        
-        // Números en el Eje X (desplazados un poco hacia abajo)
-        ctx.fillText(i, 200 + i*20, 214);
-        
-        // Números en el Eje Y (desplazados un poco a la izquierda)
-        ctx.fillText(i, 186, 200 - i*20);
-    }
-    
-    // Dibujar Parábola Objetivo (Azul Punteada)
-    ctx.beginPath();
-    ctx.strokeStyle = '#3b82f6'; // blue-500
-    ctx.lineWidth = 3;
-    ctx.setLineDash([5, 5]);
-    for(let px = 0; px <= 400; px++) {
-        let x = (px - 200) / 20;
-        let y = targetA * Math.pow(x - targetH, 2) + targetK; 
-        
-        let py = 200 - y * 20;
-        if(px === 0) ctx.moveTo(px, py);
-        else ctx.lineTo(px, py);
-    }
-    ctx.stroke();
-    ctx.setLineDash([]);
-}
-
-function graficarUsuario() {
-    const expr = document.getElementById('input-expresion').value;
-    
-    if(!expr.trim()) {
-        mostrarMensajeGrafico("Ingresa una expresión en el recuadro primero.", "error");
-        return;
-    }
-
-    // Parseo básico para evitar errores y convertir notación matemática a JS
-    const safeExpr = expr.toLowerCase().replace(/\^/g, '**');
-    let userFunc;
-    try {
-        userFunc = new Function('x', 'return ' + safeExpr);
-        userFunc(0); // Test de evaluación rápida para verificar sintaxis
-    } catch(e) {
-        mostrarMensajeGrafico("Expresión inválida. Revisa la sintaxis, por ejemplo: -(x-3)^2 - 4", "error");
-        return;
-    }
-
-    const canvas = document.getElementById('canvas-grafico');
-    const ctx = canvas.getContext('2d');
-    
-    // Redibujar plano y parábola objetivo para limpiar gráfica roja anterior
-    dibujarEscenario(ctx);
-
-    // Dibujar Parábola del Usuario (Roja sólida)
-    ctx.beginPath();
-    ctx.strokeStyle = '#f43f5e'; // rose-500
-    ctx.lineWidth = 3;
-    for(let px = 0; px <= 400; px++) {
-        let x = (px - 200) / 20;
-        let y;
-        try { 
-            y = userFunc(x); 
-        } catch(e) { continue; }
-        
-        let py = 200 - y * 20;
-        if(px === 0) ctx.moveTo(px, py);
-        else ctx.lineTo(px, py);
-    }
-    ctx.stroke();
-
-    verificarCoincidenciaGrafica(userFunc);
-}
-
-function verificarCoincidenciaGrafica(userFunc) {
-    let coincide = true;
-    
-    // Evaluar en varios puntos del dominio usando targetA
-    for(let x = -10; x <= 10; x++) {
-        let targetY = targetA * Math.pow(x - targetH, 2) + targetK;
-        let userY;
-        try { 
-            userY = userFunc(x); 
-        } catch(e) { 
-            coincide = false; 
-            break; 
+            const msgDiv = document.getElementById('mensaje-grafico');
+            if (msgDiv) {
+                msgDiv.classList.add('hidden');
+                msgDiv.className = 'hidden p-4 rounded-xl font-medium text-sm flex items-center gap-2';
+            }
+            
+            const canvas = document.getElementById('canvas-grafico');
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                dibujarEscenario(ctx);
+            }
         }
-        
-        // Tolerancia a pequeños errores de coma flotante
-        if(Math.abs(targetY - userY) > 0.1) {
-            coincide = false;
-            break;
+
+        function dibujarEscenario(ctx) {
+            ctx.clearRect(0, 0, 400, 400);
+            const isDark = document.documentElement.classList.contains('dark');
+            
+            // Cuadrícula (-10 a 10) -> Cada unidad son 20 pixeles
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = isDark ? '#334155' : '#e2e8f0';
+            for (let i = -10; i <= 10; i++) {
+                ctx.beginPath(); ctx.moveTo(0, 200 - i * 20); ctx.lineTo(400, 200 - i * 20); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(200 + i * 20, 0); ctx.lineTo(200 + i * 20, 400); ctx.stroke();
+            }
+            
+            // Ejes X e Y con puntas de flecha
+            ctx.strokeStyle = isDark ? '#94a3b8' : '#64748b';
+            ctx.lineWidth = 2;
+            ctx.beginPath(); 
+            
+            // Línea Eje X
+            ctx.moveTo(0, 200); ctx.lineTo(400, 200); 
+            ctx.moveTo(400, 200); ctx.lineTo(390, 195);
+            ctx.moveTo(400, 200); ctx.lineTo(390, 205);
+            ctx.moveTo(0, 200); ctx.lineTo(10, 195);
+            ctx.moveTo(0, 200); ctx.lineTo(10, 205);
+
+            // Línea Eje Y
+            ctx.moveTo(200, 0); ctx.lineTo(200, 400); 
+            ctx.moveTo(200, 0); ctx.lineTo(195, 10);
+            ctx.moveTo(200, 0); ctx.lineTo(205, 10);
+            ctx.moveTo(200, 400); ctx.lineTo(195, 390);
+            ctx.moveTo(200, 400); ctx.lineTo(205, 390);
+            
+            ctx.stroke();
+
+            // NÚMEROS EN LOS EJES (Graduación de 2 en 2)
+            ctx.fillStyle = isDark ? '#cbd5e1' : '#475569';
+            ctx.font = 'bold 10px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            for (let i = -10; i <= 10; i += 2) {
+                if (i === 0) continue; 
+                ctx.fillText(i, 200 + i * 20, 214);
+                ctx.fillText(i, 186, 200 - i * 20);
+            }
+            
+            // Dibujar Parábola Objetivo (Azul Punteada)
+            ctx.beginPath();
+            ctx.strokeStyle = '#3b82f6'; // blue-500
+            ctx.lineWidth = 3;
+            ctx.setLineDash([5, 5]);
+            for (let px = 0; px <= 400; px++) {
+                const x = (px - 200) / 20;
+                const y = targetA * Math.pow(x - targetH, 2) + targetK; 
+                const py = 200 - y * 20;
+                if (px === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+            ctx.setLineDash([]);
         }
-    }
 
-    if(coincide) {
-        mostrarMensajeGrafico("¡Exacto! Ambas parábolas coinciden a la perfección.", "exito");
-        if (typeof confetti === 'function') confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
-    } else {
-        mostrarMensajeGrafico("Las gráficas aún no coinciden. Revisa el desplazamiento, signos y concavidad.", "error");
-    }
-}
+        function normalizarExpresion(raw) {
+            let s = raw.trim();
 
-function mostrarMensajeGrafico(texto, tipo) {
-    const msgDiv = document.getElementById('mensaje-grafico');
-    msgDiv.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-700', 'border-emerald-300', 'bg-rose-100', 'text-rose-700', 'border-rose-300');
-    
-    if(tipo === 'exito') {
-        msgDiv.classList.add('bg-emerald-100', 'text-emerald-700', 'border', 'border-emerald-300');
-        msgDiv.innerHTML = `<i class="fa-solid fa-check-circle text-lg"></i> <span>${texto}</span>`;
-    } else {
-        msgDiv.classList.add('bg-rose-100', 'text-rose-700', 'border', 'border-rose-300');
-        msgDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-lg"></i> <span>${texto}</span>`;
-    }
-}
+            // 1. Quitar prefijos opcionales como "y =" o "f(x) ="
+            s = s.replace(/^(?:[a-zA-Z]\s*\(\s*x\s*\)|y)\s*=\s*/i, '');
+
+            // 2. Normalizar signos unicode, corchetes, superíndices, multiplicación y comas decimales
+            s = s.replace(/[−–—]/g, '-')
+                 .replace(/\[/g, '(')
+                 .replace(/\]/g, ')')
+                 .replace(/²/g, '^2')
+                 .replace(/³/g, '^3')
+                 .replace(/[×·•]/g, '*')
+                 .replace(/(\d),(\d)/g, '$1.$2');
+
+            // 3. Eliminar todos los espacios en blanco
+            s = s.replace(/\s+/g, '');
+
+            // 4. Estandarizar variable X mayúscula a x minúscula
+            s = s.replace(/X/g, 'x');
+
+            // 5. Verificar que solo contenga caracteres matemáticos válidos
+            if (!s || !/^[0-9x+\-*/^().]+$/.test(s)) {
+                return null;
+            }
+
+            // 6. Insertar multiplicaciones implícitas:
+            s = s.replace(/(\d)(x|\()/g, '$1*$2')
+                 .replace(/(x)(\(|\d)/g, '$1*$2')
+                 .replace(/(\))(x|\d|\()/g, '$1*$2');
+
+            // 7. Resolver signos unarios antes de potencias para evitar SyntaxError de JS con '**'
+            s = s.replace(/(^|[+\-*/(^])-((?:\d+\.?\d*|\.\d+)|x|\()/g, '$1(-1)*$2')
+                 .replace(/(^|[+\-*/(^])\+((?:\d+\.?\d*|\.\d+)|x|\()/g, '$1(+1)*$2');
+
+            // 8. Convertir potencias '^' a '**'
+            s = s.replace(/\^/g, '**');
+
+            return s;
+        }
+
+        function graficarUsuario() {
+            const expr = document.getElementById('input-expresion').value;
+            
+            if (!expr.trim()) {
+                mostrarMensajeGrafico("Ingresa una expresión en el recuadro primero.", "error");
+                return;
+            }
+
+            const safeExpr = normalizarExpresion(expr);
+            if (!safeExpr) {
+                mostrarMensajeGrafico("Expresión inválida. Usa solo números, x, paréntesis y operadores (+, -, *, ^).", "error");
+                return;
+            }
+
+            let userFunc;
+            try {
+                userFunc = new Function('x', 'return ' + safeExpr);
+                const testVal = userFunc(0);
+                if (typeof testVal !== 'number' || Number.isNaN(testVal)) {
+                    throw new Error("Resultado no numérico");
+                }
+            } catch (e) {
+                mostrarMensajeGrafico("Revisa la sintaxis de la expresión (paréntesis o signos incompletos).", "error");
+                return;
+            }
+
+            const canvas = document.getElementById('canvas-grafico');
+            const ctx = canvas.getContext('2d');
+            
+            // Redibujar plano y parábola objetivo para limpiar gráfica roja anterior
+            dibujarEscenario(ctx);
+
+            // Dibujar Parábola del Usuario (Roja sólida)
+            ctx.beginPath();
+            ctx.strokeStyle = '#f43f5e'; // rose-500
+            ctx.lineWidth = 3;
+            let primerPunto = true;
+
+            for (let px = 0; px <= 400; px++) {
+                const x = (px - 200) / 20;
+                let y;
+                try { 
+                    y = userFunc(x); 
+                } catch (e) { 
+                    primerPunto = true;
+                    continue; 
+                }
+
+                if (!Number.isFinite(y) || Math.abs(y) > 150) {
+                    primerPunto = true;
+                    continue;
+                }
+                
+                const py = 200 - y * 20;
+                if (primerPunto) {
+                    ctx.moveTo(px, py);
+                    primerPunto = false;
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            }
+            ctx.stroke();
+
+            verificarCoincidenciaGrafica(userFunc);
+        }
+
+        function verificarCoincidenciaGrafica(userFunc) {
+            let coincide = true;
+            
+            // Evaluar cada 0.5 unidades en el dominio [-10, 10]
+            for (let x = -10; x <= 10; x += 0.5) {
+                const targetY = targetA * Math.pow(x - targetH, 2) + targetK;
+                let userY;
+                try { 
+                    userY = userFunc(x); 
+                } catch (e) { 
+                    coincide = false; 
+                    break; 
+                }
+                
+                if (!Number.isFinite(userY) || Math.abs(targetY - userY) > 0.1) {
+                    coincide = false;
+                    break;
+                }
+            }
+
+            if (coincide) {
+                mostrarMensajeGrafico("¡Exacto! Ambas parábolas coinciden a la perfección.", "exito");
+                if (typeof confetti === 'function') confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+            } else {
+                mostrarMensajeGrafico("Las gráficas aún no coinciden. Revisa el desplazamiento, signos y concavidad.", "error");
+            }
+        }
+
+        function mostrarMensajeGrafico(texto, tipo) {
+            const msgDiv = document.getElementById('mensaje-grafico');
+            msgDiv.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-700', 'border-emerald-300', 'bg-rose-100', 'text-rose-700', 'border-rose-300');
+            
+            if (tipo === 'exito') {
+                msgDiv.classList.add('bg-emerald-100', 'text-emerald-700', 'border', 'border-emerald-300');
+                msgDiv.innerHTML = `<i class="fa-solid fa-check-circle text-lg"></i> <span>${texto}</span>`;
+            } else {
+                msgDiv.classList.add('bg-rose-100', 'text-rose-700', 'border', 'border-rose-300');
+                msgDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-lg"></i> <span>${texto}</span>`;
+            }
+        }
+
+        window.initGraficoExpresion = initGraficoExpresion;
+        window.graficarUsuario = graficarUsuario;
 
 // --- SECTION 8: DE LA EXPRESIÓN AL GRÁFICO ---
         let canvasExp, ctxExp;
