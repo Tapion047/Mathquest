@@ -3084,54 +3084,124 @@ function selectKahoomaNode(boardId, nodeIdx, val) {
         // MOTOR DEL JUEGO: BINGO MATEMÁTICO (NUEVO)
         // ---------------------------------------------
         const bingoBancoCompleto = [
-            // Resultado: 10
-            { exp: "20% de 50", ans: "10" }, { exp: "√100", ans: "10" }, { exp: "5 × 2", ans: "10" }, { exp: "|-10|", ans: "10" },
-            // Resultado: 50
-            { exp: "25% de 200", ans: "50" }, { exp: "√2500", ans: "50" }, { exp: "100 ÷ 2", ans: "50" }, { exp: "10% de 500", ans: "50" },
-            // Resultado: 100
-            { exp: "10²", ans: "100" }, { exp: "20% de 500", ans: "100" }, { exp: "25 × 4", ans: "100" }, { exp: "√10000", ans: "100" },
-            // Resultado: 200
-            { exp: "10% de 2000", ans: "200" }, { exp: "400 ÷ 2", ans: "200" }, { exp: "50% de 400", ans: "200" },
-            // Descomposición de raíces
-            { exp: "√8", ans: "2√2" }, { exp: "4 ÷ √2", ans: "2√2" },
-            { exp: "√18", ans: "3√2" },
-            { exp: "√32", ans: "4√2" },
-            { exp: "√50", ans: "5√2" },
-            { exp: "√12", ans: "2√3" },
-            { exp: "√27", ans: "3√3" },
-            { exp: "√75", ans: "5√3" },
-            // Resultado: -5
-            { exp: "-15 ÷ 3", ans: "-5" }, { exp: "-2 - 3", ans: "-5" }, { exp: "(-1) × 5", ans: "-5" },
-            // Resultado: -10
-            { exp: "-5 × 2", ans: "-10" }, { exp: "-20 ÷ 2", ans: "-10" }, { exp: "5 - 15", ans: "-10" },
-            // Resultado: -2
-            { exp: "(-8) ÷ 4", ans: "-2" }, { exp: "1 - 3", ans: "-2" }, { exp: "∛-8", ans: "-2" },
-            // Resultado: 1/2 y 0,25
-            { exp: "2⁻¹", ans: "1/2" }, { exp: "50% de 1", ans: "1/2" }, { exp: "3/6 simplificado", ans: "1/2" },
-            { exp: "25% de 1", ans: "0,25" }, { exp: "1/4", ans: "0,25" }, { exp: "5 ÷ 20", ans: "0,25" },
-            // Resultado: 0
-            { exp: "log(1)", ans: "0" }, { exp: "3 × 0", ans: "0" }, { exp: "5 - 5", ans: "0" },
-            // Resultado: 1
-            { exp: "log₁₀(10)", ans: "1" }, { exp: "3/4 + 1/4", ans: "1" }, { exp: "(-1)²", ans: "1" }, { exp: "2⁰", ans: "1" },
-            // Resultado: 2
-            { exp: "∛8", ans: "2" }, { exp: "log₂(4)", ans: "2" }, { exp: "10% de 20", ans: "2" }, { exp: "√4", ans: "2" },
-            // Resultado: 3
-            { exp: "log₂(8)", ans: "3" }, { exp: "√9", ans: "3" }, { exp: "75% de 4", ans: "3" },
-            // Resultado: 4
-            { exp: "(-2)²", ans: "4" }, { exp: "√16", ans: "4" }, { exp: "20% de 20", ans: "4" },
-            // Resultado: 5
-            { exp: "0,5 × 10", ans: "5" }, { exp: "√25", ans: "5" }, { exp: "25% de 20", ans: "5" },
-            // Resultado: 8
-            { exp: "√64", ans: "8" }, { exp: "2³", ans: "8" }, { exp: "50% de 16", ans: "8" },
-            // Resultado: 9
-            { exp: "3²", ans: "9" }, { exp: "√81", ans: "9" }, { exp: "5² - 4²", ans: "9" },
-            // Resultado: 12 y 15
-            { exp: "√144", ans: "12" }, { exp: "10% de 120", ans: "12" },
-            { exp: "10 - (-5)", ans: "15" }, { exp: "50% de 30", ans: "15" },
-            // Resultado: 25
-            { exp: "5²", ans: "25" }, { exp: "√625", ans: "25" }, { exp: "100 ÷ 4", ans: "25" }
-        ];
+    // ==========================================
+    // CÁLCULO RÁPIDO (NÚMEROS ENTEROS Y BÁSICOS)
+    // ==========================================
 
+    // Resultado: 0
+    { exp: "log(1)", ans: "0" }, { exp: "3 × 0", ans: "0" }, { exp: "5 - 5", ans: "0" },
+    { exp: "log₂(1)", ans: "0" }, { exp: "sen(0°)", ans: "0" }, { exp: "cos(90°)", ans: "0" },
+    { exp: "tan(0°)", ans: "0" },
+
+    // Resultado: 1
+    { exp: "log₁₀(10)", ans: "1" }, { exp: "3/4 + 1/4", ans: "1" }, { exp: "(-1)²", ans: "1" },
+    { exp: "2⁰", ans: "1" }, { exp: "log₅(5)", ans: "1" }, { exp: "0!", ans: "1" },
+    { exp: "1!", ans: "1" }, { exp: "sen(90°)", ans: "1" }, { exp: "cos(0°)", ans: "1" },
+    { exp: "tan(45°)", ans: "1" },
+
+    // Resultado: 2
+    { exp: "∛8", ans: "2" }, { exp: "log₂(4)", ans: "2" }, { exp: "10% de 20", ans: "2" },
+    { exp: "√4", ans: "2" }, { exp: "log₁₀(100)", ans: "2" }, { exp: "log₃(9)", ans: "2" },
+    { exp: "2!", ans: "2" }, { exp: "2¹", ans: "2" },
+
+    // Resultado: 3
+    { exp: "log₂(8)", ans: "3" }, { exp: "√9", ans: "3" }, { exp: "75% de 4", ans: "3" },
+    { exp: "∛27", ans: "3" }, { exp: "log₁₀(1000)", ans: "3" }, { exp: "log₃(27)", ans: "3" },
+    { exp: "3! ÷ 2!", ans: "3" },
+
+    // Resultado: 4
+    { exp: "(-2)²", ans: "4" }, { exp: "√16", ans: "4" }, { exp: "20% de 20", ans: "4" },
+    { exp: "log₂(16)", ans: "4" }, { exp: "∛64", ans: "4" }, { exp: "4! ÷ 3!", ans: "4" },
+    { exp: "2²", ans: "4" },
+
+    // Resultado: 5
+    { exp: "0,5 × 10", ans: "5" }, { exp: "√25", ans: "5" }, { exp: "25% de 20", ans: "5" },
+    { exp: "log₂(32)", ans: "5" }, { exp: "∛125", ans: "5" }, { exp: "5! ÷ 4!", ans: "5" },
+
+    // Resultado: 6
+    { exp: "√36", ans: "6" }, { exp: "3!", ans: "6" }, { exp: "6! ÷ 5!", ans: "6" },
+    { exp: "10% de 60", ans: "6" }, { exp: "50% de 12", ans: "6" },
+
+    // Resultado: 8
+    { exp: "√64", ans: "8" }, { exp: "2³", ans: "8" }, { exp: "50% de 16", ans: "8" },
+    { exp: "8! ÷ 7!", ans: "8" }, { exp: "20% de 40", ans: "8" },
+
+    // Resultado: 9
+    { exp: "3²", ans: "9" }, { exp: "√81", ans: "9" }, { exp: "5² - 4²", ans: "9" },
+    { exp: "(-3)²", ans: "9" }, { exp: "9! ÷ 8!", ans: "9" },
+
+    // Resultado: 10
+    { exp: "20% de 50", ans: "10" }, { exp: "√100", ans: "10" }, { exp: "5 × 2", ans: "10" },
+    { exp: "|-10|", ans: "10" }, { exp: "10! ÷ 9!", ans: "10" }, { exp: "8 aumentado en 25%", ans: "10" },
+
+    // Resultado: 12 y 15
+    { exp: "√144", ans: "12" }, { exp: "10% de 120", ans: "12" }, { exp: "4! ÷ 2!", ans: "12" },
+    { exp: "10 aumentado en 20%", ans: "12" },
+    { exp: "10 - (-5)", ans: "15" }, { exp: "50% de 30", ans: "15" }, { exp: "10 aumentado en 50%", ans: "15" },
+
+    // Resultado: 16, 20 y 24
+    { exp: "2⁴", ans: "16" }, { exp: "4²", ans: "16" }, { exp: "√256", ans: "16" },
+    { exp: "5! ÷ 3!", ans: "20" }, { exp: "10% de 200", ans: "20" },
+    { exp: "4!", ans: "24" }, { exp: "20 aumentado en 20%", ans: "24" },
+
+    // Resultado: 25, 27 y 32
+    { exp: "5²", ans: "25" }, { exp: "√625", ans: "25" }, { exp: "100 ÷ 4", ans: "25" },
+    { exp: "20 aumentado en 25%", ans: "25" },
+    { exp: "3³", ans: "27" }, { exp: "2⁵", ans: "32" },
+
+    // Resultado: 50, 100, 120 y 200
+    { exp: "25% de 200", ans: "50" }, { exp: "√2500", ans: "50" }, { exp: "100 ÷ 2", ans: "50" },
+    { exp: "10% de 500", ans: "50" }, { exp: "40 aumentado en 25%", ans: "50" },
+    { exp: "10²", ans: "100" }, { exp: "20% de 500", ans: "100" }, { exp: "25 × 4", ans: "100" },
+    { exp: "√10000", ans: "100" }, { exp: "80 aumentado en 25%", ans: "100" },
+    { exp: "5!", ans: "120" }, { exp: "100 aumentado en 20%", ans: "120" },
+    { exp: "10% de 2000", ans: "200" }, { exp: "400 ÷ 2", ans: "200" }, { exp: "50% de 400", ans: "200" },
+
+    // Negativos
+    { exp: "-15 ÷ 3", ans: "-5" }, { exp: "-2 - 3", ans: "-5" }, { exp: "(-1) × 5", ans: "-5" },
+    { exp: "-5 × 2", ans: "-10" }, { exp: "-20 ÷ 2", ans: "-10" }, { exp: "5 - 15", ans: "-10" },
+    { exp: "(-8) ÷ 4", ans: "-2" }, { exp: "1 - 3", ans: "-2" }, { exp: "∛-8", ans: "-2" },
+
+    // ==========================================
+    // FRACCIONES, TRIGONOMETRÍA Y PROBABILIDADES
+    // ==========================================
+
+    // Resultado: 1/2
+    { exp: "2⁻¹", ans: "1/2" }, { exp: "50% de 1", ans: "1/2" }, { exp: "3/6 simplificado", ans: "1/2" },
+    { exp: "sen(30°)", ans: "1/2" }, { exp: "cos(60°)", ans: "1/2" },
+    { exp: "P(sacar cara en 1 moneda)", ans: "1/2" }, { exp: "P(sacar par en un dado)", ans: "1/2" },
+    { exp: "P(sacar impar en un dado)", ans: "1/2" }, { exp: "P(sacar número primo en un dado)", ans: "1/2" }, 
+    // Resultado: 0,25 y 1/4
+    { exp: "25% de 1", ans: "0,25" }, { exp: "1/4", ans: "0,25" }, { exp: "5 ÷ 20", ans: "0,25" },
+    { exp: "P(sacar 2 caras en 2 monedas)", ans: "1/4" }, { exp: "2⁻²", ans: "1/4" }, { exp: "5/20 simplificado", ans: "1/4" }, { exp: "4/16 simplificado", ans: "1/4" },
+
+    // Otras Probabilidades sencillas (dado y hasta 3 monedas)
+    { exp: "P(sacar par mayor que 2 en un dado)", ans: "1/3" }, { exp: "P(sacar impar mayor que 1 en un dado)", ans: "1/3" },
+    { exp: "P(sacar un 5 en un dado)", ans: "1/6" }, { exp: "P(sacar un 1 en un dado)", ans: "1/6" }, { exp: "P(sacar un 6 en un dado)", ans: "1/6" },
+    { exp: "P(sacar 3 caras en 3 monedas)", ans: "1/8" }, { exp: "P(sacar 3 sellos en 3 monedas)", ans: "1/8" },
+    { exp: "P(sacar al menos 1 cara en 2 monedas)", ans: "3/4" },
+
+    // ==========================================
+    // RAÍCES, RACIONALIZACIÓN Y TRIGONOMETRÍA
+    // ==========================================
+
+    // Descomposición de raíces y racionalizaciones sencillas
+    { exp: "2 ÷ √2", ans: "√2" },
+    { exp: "3 ÷ √3", ans: "√3" }, { exp: "tan(60°)", ans: "√3" },
+    { exp: "√8", ans: "2√2" }, { exp: "4 ÷ √2", ans: "2√2" },
+    { exp: "√18", ans: "3√2" }, { exp: "6 ÷ √2", ans: "3√2" },
+    { exp: "√32", ans: "4√2" },
+    { exp: "√50", ans: "5√2" },
+    { exp: "√12", ans: "2√3" }, { exp: "6 ÷ √3", ans: "2√3" },
+    { exp: "√27", ans: "3√3" },
+    { exp: "√75", ans: "5√3" },
+    { exp: "√20", ans: "2√5" }, { exp: "10 ÷ √5", ans: "2√5" },
+
+    // Trigonometría notable + racionalizaciones equivalentes
+    { exp: "sen(45°)", ans: "√2/2" }, { exp: "cos(45°)", ans: "√2/2" }, { exp: "1 ÷ √2", ans: "√2/2" },
+    { exp: "sen(60°)", ans: "√3/2" }, { exp: "cos(30°)", ans: "√3/2" },
+    { exp: "tan(30°)", ans: "√3/3" }, { exp: "1 ÷ √3", ans: "√3/3" }
+];
         let bingoPendientes = [];
         let bingoActual = null;
         let aciertosBingo = 0;
@@ -4022,7 +4092,7 @@ let estadoRecta = { pool: [], zonasExactas: {}, zonasIntervalos: {} };
 
 let erroresRecta = [];
 let inicioRectaActual = 0;
-let finRectaActual = 10;
+let finRectaActual = 5;
 let rectaCompletada = false;
 
 function toggleBotonComprobarRecta(mostrar) {
@@ -4033,10 +4103,10 @@ function toggleBotonComprobarRecta(mostrar) {
 }
 
 function initRecta() {
-    // 1. Zonas dinámicas (Posibles inicios de recta de 10 unidades)
-    const puntosInicio = [-15, -10, -5, 0, 5, 10]; 
+    // 1. Zonas dinámicas (Posibles inicios de recta de 5 unidades, cubriendo de -5 a 15)
+    const puntosInicio = [-5, 0, 5, 10]; 
     inicioRectaActual = puntosInicio[Math.floor(Math.random() * puntosInicio.length)];
-    finRectaActual = inicioRectaActual + 10;
+    finRectaActual = inicioRectaActual + 5;
 
     // 2. Limpiar estado y restaurar botón Comprobar
     estadoRecta.zonasExactas = {};
@@ -4067,7 +4137,7 @@ function renderRecta() {
     // RENDERIZAR POOL (Bandeja)
     const poolContainer = document.getElementById('recta-pool');
     poolContainer.innerHTML = '';
-    if(estadoRecta.pool.length === 0) {
+    if (estadoRecta.pool.length === 0) {
         poolContainer.innerHTML = '<span class="text-slate-400 text-sm">Bandeja vacía</span>';
     } else {
         estadoRecta.pool.forEach(tarjeta => poolContainer.appendChild(crearElementoTarjeta(tarjeta, true)));
@@ -4162,7 +4232,7 @@ function moverTarjeta(id, destino, index = null) {
             const idx = estadoRecta.zonasExactas[key].findIndex(t => t.id === id);
             if (idx > -1) { tarjetaEncontrada = estadoRecta.zonasExactas[key].splice(idx, 1)[0]; break; }
         }
-        if(!tarjetaEncontrada) {
+        if (!tarjetaEncontrada) {
             for (let key in estadoRecta.zonasIntervalos) {
                 const idx = estadoRecta.zonasIntervalos[key].findIndex(t => t.id === id);
                 if (idx > -1) { tarjetaEncontrada = estadoRecta.zonasIntervalos[key].splice(idx, 1)[0]; break; }
@@ -4184,19 +4254,17 @@ function comprobarOrdenRecta() {
     const mensajeDiv = document.getElementById('mensaje-recta');
     erroresRecta = [];
     let todoCorrecto = true;
-
-    if (estadoRecta.pool.length > 0) {
-        mensajeDiv.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-xl"></i> Quedan números en la bandeja.';
-        mensajeDiv.className = 'p-4 rounded-xl font-bold text-sm flex items-center justify-center gap-3 w-full bg-amber-100 text-amber-700 border border-amber-300';
-        mensajeDiv.classList.remove('hidden');
-        return;
-    }
+    let totalUbicadas = 0;
 
     // 1. Validar zonas exactas
     for (let key in estadoRecta.zonasExactas) {
         let valEsperado = parseInt(key);
         estadoRecta.zonasExactas[key].forEach(carta => {
-            if (carta.val !== valEsperado) { erroresRecta.push(carta.id); todoCorrecto = false; }
+            totalUbicadas++;
+            if (carta.val !== valEsperado) {
+                erroresRecta.push(carta.id);
+                todoCorrecto = false;
+            }
         });
     }
 
@@ -4207,30 +4275,45 @@ function comprobarOrdenRecta() {
         let cartas = estadoRecta.zonasIntervalos[key];
         
         for (let i = 0; i < cartas.length; i++) {
+            totalUbicadas++;
             if (cartas[i].val <= limiteInf || cartas[i].val >= limiteSup) {
                 erroresRecta.push(cartas[i].id);
                 todoCorrecto = false;
             }
             if (i > 0 && cartas[i - 1].val > cartas[i].val) {
-                erroresRecta.push(cartas[i].id);
+                if (!erroresRecta.includes(cartas[i].id)) erroresRecta.push(cartas[i].id);
                 if (!erroresRecta.includes(cartas[i - 1].id)) erroresRecta.push(cartas[i - 1].id);
                 todoCorrecto = false;
             }
         }
     }
 
-    if (todoCorrecto) {
+    // Si aún no ha puesto ninguna raíz en la recta
+    if (totalUbicadas === 0) {
+        mensajeDiv.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-xl"></i> Ubica al menos una raíz en la recta para comprobar.';
+        mensajeDiv.className = 'p-4 rounded-xl font-bold text-sm flex items-center justify-center gap-3 w-full bg-amber-100 text-amber-700 border border-amber-300';
+        mensajeDiv.classList.remove('hidden');
+        return;
+    }
+
+    // 3. Mostrar retroalimentación según el resultado
+    if (!todoCorrecto) {
+        mensajeDiv.innerHTML = '<i class="fa-solid fa-xmark-circle text-2xl mt-0.5"></i> <div class="text-left">Hay errores en las raíces ubicadas. Si es exacto va en la marca del número; si es inexacto, en el espacio intermedio. Además, revisa que estén ordenados de menor a mayor en un mismo espacio.</div>';
+        mensajeDiv.className = 'p-4 rounded-xl font-bold flex text-left items-start gap-3 w-full bg-rose-100 text-rose-700 border border-rose-300';
+    } else if (estadoRecta.pool.length > 0) {
+        const faltan = estadoRecta.pool.length;
+        const textoFaltan = faltan === 1 ? 'falta 1 raíz' : `faltan ${faltan} raíces`;
+        mensajeDiv.innerHTML = `<i class="fa-solid fa-circle-check text-xl"></i> ¡Vas muy bien! Las raíces ubicadas están correctas, pero aún ${textoFaltan} por ubicar.`;
+        mensajeDiv.className = 'p-4 rounded-xl font-bold text-sm flex items-center justify-center gap-3 w-full bg-sky-100 text-sky-700 border border-sky-300';
+    } else {
         rectaCompletada = true;
         tarjetaActivaRecta = null;
         toggleBotonComprobarRecta(false);
 
         mensajeDiv.innerHTML = '<i class="fa-solid fa-trophy text-2xl"></i> ¡Perfecto! Dominas el orden exacto e inexacto.';
         mensajeDiv.className = 'p-4 rounded-xl font-bold flex items-center justify-center gap-3 w-full bg-teal-100 text-teal-700 border border-teal-300';
-        if (typeof userStats !== 'undefined') { userStats.xp += 25; if(typeof updateStatsUI === 'function') updateStatsUI(); }
+        if (typeof userStats !== 'undefined') { userStats.xp += 25; if (typeof updateStatsUI === 'function') updateStatsUI(); }
         if (typeof confetti === 'function') confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
-    } else {
-        mensajeDiv.innerHTML = '<i class="fa-solid fa-xmark-circle text-2xl mt-0.5"></i> <div class="text-left">Hay errores. Si es exacto va en la marca del número; si es inexacto, en el espacio intermedio. Además, revisa que estén ordenados de menor a mayor en un mismo espacio.</div>';
-        mensajeDiv.className = 'p-4 rounded-xl font-bold flex text-left items-start gap-3 w-full bg-rose-100 text-rose-700 border border-rose-300';
     }
     
     mensajeDiv.classList.remove('hidden');
